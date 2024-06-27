@@ -158,52 +158,26 @@ app.get('/app/recherche', (req, res) => {
   });
 });
 
-app.put('/app/modification', (req, res) => {
-  const { Date_debut_c, Date_fin_c, Type_contrat_Id_type_contrat, Mat_employe,N_contrat } = req.body;
-  const sql = `
-    UPDATE employe
-    JOIN contrat ON contrat.Employe_Mat_employe = employe.Mat_employe
-    SET Date_debut_c = ?, Date_fin_c = ?, Type_contrat_Id_type_contrat = ?
-    WHERE Mat_employe = ?
-  `;
-  const values = [Mat_employe,N_contrat,Date_debut_c, Date_fin_c, Type_contrat_Id_type_contrat, ];
-  const valuess = [Date_debut_c, Date_fin_c, Type_contrat_Id_type_contrat, Mat_employe];
-  const archiveQuery = `
-  INSERT INTO archive (
-   Employe_Mat_employe,
-   Contrat_N_contrat,
-   Date_debut_c,
-   Date_fin_c,
-   Type_contrat_Id_type_contrat
-  ) VALUES (?,?,?,?,?)
-`;
-db.query(archiveQuery, [
-  Mat_employe,
-  N_contrat,
-  Date_debut_c,
-  Date_fin_c,
-  Type_contrat_Id_type_contrat
-  
-], (err, results) => {
-  if (err) {
-    return db.rollback(() => {
-      res.status(500).json({ error: err.message });
+app.get('/app', (req, res) => {
+  const query = 'SELECT * FROM livre'; 
+  db.query(query, (err, results) => {
+      if (err) {
+          console.error('Error fetching books:', err);
+          res.status(500).send('Error fetching books');
+          return;
+      }
+      const books = results.map(book => {
+        return {
+            ...book,
+            photo: book.photo ? Buffer.from(book.photo).toString('base64') : null
+        };
     });
-  }
 
+    res.json(books);
+});
 });
 
-    db.query(sql, valuess, (err, results) => {
-      if (err) {
-        console.error('Erreur lors de la mise à jour des données :', err);
-        res.status(500).json({ error: 'Erreur de serveur' });
-      } else {
-        res.status(200).json({ message: 'Données mises à jour avec succès' });
-      }
-    });
 
-  });
-/*});*/
 app.get('/app/archiveplus', (req, res) => {
   const matricule = req.query.matricule; // Récupérer le matricule de la requête
   const query = `
