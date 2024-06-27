@@ -2,15 +2,6 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useHistory} from 'react-router-dom';
 import './../recherche/recherche.css'
-
-function formatDate(dateString) {
-  const date = new Date(dateString);
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
-
 function Archive() {
   const [employes, setemployes] = useState([]);
   const [error, setError] = useState(null);

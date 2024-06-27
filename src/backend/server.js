@@ -24,7 +24,7 @@ const db = mysql.createConnection({
   host: 'localhost',
   user: 'root',
   password: '',
-  database: 'gesnsiaa'
+  database: 'biblio'
 });
 
 // Middleware pour parser le corps des requêtes
@@ -33,10 +33,10 @@ app.use(cors());
 
 // Route de connexion
 app.post('/login', (req, res) => {
-  const { id_user, mot_de_passe } = req.body;
+  const { Id_user, Mot_de_passe } = req.body;
 
-  const sql = 'SELECT role FROM utilisateur WHERE id_user = ? AND mot_de_passe = ?';
-  const values = [id_user, mot_de_passe];
+  const sql = 'SELECT Prenom FROM utilisateur WHERE Id_user = ? AND Mot_de_passe = ?';
+  const values = [Id_user, Mot_de_passe];
 
   db.query(sql, values, (err, results) => {
     if (err) {
@@ -46,9 +46,9 @@ app.post('/login', (req, res) => {
 
     if (results.length > 0) {
       const jwtSecret = process.env.JWT_SECRET;
-      const role = results[0].role;
-      const token = jwt.sign({ id_user, role }, jwtSecret, { expiresIn: '1h' });
-      return res.status(200).json({ message: 'Connexion réussie', token, role });
+      const Prenom = results[0].Prenom;
+      const token = jwt.sign({ Id_user, Prenom }, jwtSecret, { expiresIn: '1h' });
+      return res.status(200).json({ message: 'Connexion réussie', token, Prenom });
     } else {
       return res.status(401).json({ error: 'Identifiants invalides' });
     }

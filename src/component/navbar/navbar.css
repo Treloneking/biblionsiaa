@@ -111,3 +111,9 @@ span {
     font-size: 24px;
     cursor:pointer;
 }
+.bienvenue{
+    font-size: 24px;
+    font-weight: bold;
+    color: rgba(0, 0, 0, 0.712);
+
+}

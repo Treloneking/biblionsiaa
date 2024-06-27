@@ -23,14 +23,6 @@ const App = () => {
     setIsAuthenticated(true);
   };
 
-  const handleLogout = () => {
-    // Appelé lors de la déconnexion pour supprimer le token et mettre à jour l'état d'authentification
-    localStorage.removeItem('token');
-    setIsAuthenticated(false);
-    // Forcer le rafraîchissement de la page
-    window.location.reload();
-  };
-
   return (
     <div className='fondside'>
       <Router>

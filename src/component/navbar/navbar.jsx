@@ -12,14 +12,21 @@ function Navbar() {
     const [sidebar, setSidebar] = useState(false);
     const history = useHistory();
     const showSidebar = () => setSidebar(!sidebar);
+    const [Prenom, setPrenom] = useState(null);
 
     const handleNotification = () => {
         history.push(`/app/notification`);
     };
+    useEffect(() => {
+        // Récupère le token depuis le localStorage lors du montage du composant
+        const storedPrenom = localStorage.getItem('Prenom');
+        setPrenom(storedPrenom);
+      }, []);
+
     const handleLogOut = () => {
         // Supprime le token du stockage local
         localStorage.removeItem('token');
-        localStorage.removeItem('role');
+        localStorage.removeItem('Prenom');
         
         // Actualise la page
         window.location.reload();
@@ -27,15 +34,15 @@ function Navbar() {
 
     return (
         <>
-            <IconContext.Provider value={{ color: '#fff' }}>
+            <IconContext.Provider value={{ color: 'rgba(0, 0, 0, 0.712)' }}>
                 <div className='nav-bar'>
             
                     <Link to="/app" className='menu-bars'>
                         <FaIcons.FaBars onClick={showSidebar} />
                     </Link>
-              
+          <marquee><p className='bienvenue'>Bienvenue à la Bibliotheque Numérique de NSIA Mr/Mme {Prenom}</p></marquee>
                     <div className='nav-bar-icons'>
-                        <IoIcons.IoMdNotificationsOutline className='notification-icon' onClick={handleNotification} />
+                        <IoIcons.IoMdNotificationsOutline values={{color:'rgba(0, 0, 0, 0.712)'}} className='notification-icon' onClick={handleNotification} />
                     </div>
                 </div>
                 <nav className={sidebar ? 'nav-menu active' : 'nav-menu'}>
