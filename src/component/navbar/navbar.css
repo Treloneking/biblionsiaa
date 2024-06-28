@@ -13,9 +13,19 @@
     background: none;
 }
 
+.nav-bar-icons {
+    display: flex;
+    align-items: center;
+}
+
+.notification-icon {
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
 .nav-menu {
     background-color: goldenrod;
-    width: 200px;
+    width: 250px;
     height: 100vh;
     display: flex;
     justify-content: center;
@@ -23,11 +33,25 @@
     top: 0;
     left: -100%;
     transition: 850ms;
+    z-index: 10;
 }
 
 .nav-menu.active {
     left: 0;
     transition: 350ms;
+}
+
+.nav-menu-items {
+    width: 100%;
+}
+
+.navbar-toggle {
+    background-color: goldenrod;
+    width: 100%;
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    padding: 10px;
 }
 
 .nav-text {
@@ -38,34 +62,12 @@
     list-style: none;
     height: 60px;
 }
-.boutonlogout{
-    background-color: goldenrod;
-    border: none;
-    color: white;
-    padding: 8px 0px 8px 16px;
-    position: fixed;
-    bottom:40px;
-}
-.boutonlogout:hover{
-    background-color:rgb(19, 19, 75);
-    border-radius: 4px;
-}
-.boutonlogout a {
-    text-decoration: none;
-    color: white;
-    font-size: 18px;
-    display: flex;
-    align-items: center;
-    padding: 0 16px;
-    border-radius: 8px;
-}
 
 .nav-text a {
     text-decoration: none;
-    color: white;
+    color: #f5f5f5;
     font-size: 18px;
-    width: 95%;
-    height: 100%;
+    width: 100%;
     display: flex;
     align-items: center;
     padding: 0 16px;
@@ -73,118 +75,204 @@
 }
 
 .nav-text a:hover {
-    background-color: rgb(19, 19, 75);
+    background-color: #1a83ff;
 }
 
-.nav-menu-items {
-    width: 100%;
-}
-
-
-.navbar-toggle {
-    background-color: goldenrod;
-    width: 100%;
-    height: 80px;
-    display: flex;
-    justify-content: start;
-    align-items: center;
-}
-
-span {
-    margin-left: 16px;
-}
-
-.nav-bar1 {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-}
-
-.nav-bar-icons {
-    display: flex;
-    align-items: center;
-    margin-right: 2rem;
-}
-
-.notification-icon {
-    font-size: 24px;
-    cursor:pointer;
-}
-.bienvenue{
-    font-size: 24px;
-    font-weight: bold;
-    color: rgba(0, 0, 0, 0.712);
-
-}
-.face-biblio{
-    width: 1200px; 
-    height: 800px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
-  border-radius: 25px;
-  text-align: center;
-  margin-top: 60px;
-  padding: 15px;
-  margin-left: auto;
-  margin-right: auto;
-  color: white;
-}
-.card {
-    width: 1;
-    margin: 1px; /* Add margin to provide space between cards */
-    padding: 2px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    border-spacing: 40px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    border-collapse: separate;
-    border: 3px solid #000;
-    background-color:rgba(218, 165, 32, 0);
-}
-.card h3 {
-    font-size: 1.25rem;
-    color: #333;
-    margin: 0.5rem 0;
-}
-
-.card p {
+.bienvenue {
     font-size: 1rem;
-    color: #333;
-    margin: 0.25rem 0;
+    color: #fff;
+    font-weight: bold;
 }
+.intro{
+background-image: url('../../../../../Desktop/tdb-2069-a-1500_1760d444aee707486ef5aaa519e5253b.jpeg');
+background-repeat: no-repeat;
+background-size: cover;
+height: 200px;
+
+}
+body.popup-open {
+    filter: blur(5px); /* Ajustez la valeur du flou selon vos préférences */
+}
+.intro a {
+    font-weight: bold;
+    font-size: 1.3rem;
+    color: black;
+    text-align: center;
+ display: block;
+  padding: 45px;
+    background-color: #f5f1f157;
+}
+.tims {
+    margin-right: 10px; /* Adjust the value as needed */
+    width: 100px;
+    border-radius:4px ;
+    background-color: rgb(255, 97, 34);
+    color: #ffffff;
+
+}
+.texte{
+    text-decoration: none;
+}
+.face-biblio {
+    padding: 20px;
+    background-color: #f9f9f9;
+}
+
+.title h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+    color: #444;
+}
+
+.middle h1 {
+    text-align: center;
+    margin: 40px 0;
+    font-size: 2rem;
+    color: #444;
+}
+
+.card-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    padding: 20px;
+    margin: 10px;
+    text-align: center;
+    transition: transform 0.3s;
+    max-width: 250px; /* Set a maximum width for the cards */
+}
+
 .card:hover {
-    font-size: 90px;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    transform: translateY(-5px);
+}
+
+.modalbook-image {
+    /* width: 100%; */
+    /* height: 250px;  */
+    object-fit: cover; /* Ensure the image covers the area without distortion */
+    border-radius: 4px;
+    margin-bottom: 10px;
 }
 
 .book-image {
-    width: 100;
-    height:200px;
-    float: left; 
-    position: relative;
-}
-
-.slick-slide {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.slick-dots li button:before {
-    color: #000;
+    width: 100%;
+    height: 250px; /* Set a fixed height for the image */
+    object-fit: cover; /* Ensure the image covers the area without distortion */
+    border-radius: 4px;
+    margin-bottom: 10px;
 }
 
 .slick-prev:before,
 .slick-next:before {
-    color: #000;
-}
-.title{
-    background-color: rgba(255, 255, 255, 0.274);
-    color: #000;
-    height: 40px;
-    border-radius: 30px;
+    color: rgb(0, 0, 0); /* Change color of the navigation arrows */
+    font-size: 1.5rem; /* Adjust size of the navigation arrows */
 }
 
+.slick-prev {
+    left: -35px; /* Positioning the previous button */
+}
+
+.slick-next {
+    right: -35px; /* Positioning the next button */
+}
+
+footer.end {
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+}
+
+.boutonlogout {
+    background-color: transparent;
+    border: none;
+    color: #f5f5f5;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+    cursor: pointer;
+}
+
+.boutonlogout:hover {
+    color: #1a83ff;
+}
+
+
+/*  */
+
+
+.modalN {
+    font-size: 12px;
+  }
+  .modalN > .header {
+    width: 100%;
+    border-bottom: 1px solid gray;
+    font-size: 18px;
+    text-align: center;
+    padding: 5px;
+  }
+  .modalN > .content {
+    width: 100%;
+    padding: 10px 5px;
+  }
+  .modalN > .actions {
+    width: 100%;
+    padding: 10px 5px;
+    margin: auto;
+    text-align: center;
+  }
+  .modalN > .close {
+    cursor: pointer;
+    position: absolute;
+    display: block;
+    padding: 2px 5px;
+    line-height: 20px;
+    right: -10px;
+    top: -10px;
+    font-size: 24px;
+    background: #ffffff;
+    border-radius: 18px;
+    border: 1px solid #cfcece;
+  }
+ 
+
+.popup-content .close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+}
+.popup-content  {
+}
+
+.book-image-popup {
+    width: 70%;
+    height: 480px;
+    margin-bottom: 10px;
+    float: left;
+}
+.pop{
+    width: 50%;
+    height: 100%;
+}
+.popup-text {
+    background-color: red;
+    color: #000000;
+    height: 480px;
+    width: 480px;
+    border-radius: 17px;
+    margin-left: auto;
+}
