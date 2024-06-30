@@ -1,70 +1,67 @@
-.formulaireregister { 
-    width: 700px; 
-    height: 500px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-    text-align: center;
-    margin: auto; /* Centre le formulaire horizontalement */
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center; /* Centre les éléments flexibles horizontalement */
-    align-items: center; /* Centre les éléments flexibles verticalement */
-    padding: 10px;
-    color: white;
-  }
-  
-  .form-group {
-    flex: 0 0 calc(50% - 20px); /* Définit la largeur de chaque groupe à 50% moins les marges */
-    margin: 10px; /* Marge entre chaque groupe */
-  }
-  
-  label {
-    display: block; /* Affiche le label en bloc */
-    margin-bottom: 5px; /* Marge sous le label */
-  }
-  
-  .REGISTRE {
-    box-shadow: 0 0 100000px rgba(218, 165, 32, 0.884);
-    width: 100%; /* Remplit la largeur disponible */
-    padding: 8px; /* Ajoute un espace à l'intérieur de l'input */
-    box-sizing: border-box; /* Inclut le padding dans la largeur */
-  }
-  .form-group .suivant1:hover{
-    background-color: #272424;
-    border-radius: 30px;
-  }
-  .recap {
-    text-align: center;
-  }
-  
-  .recap-item {
-    color: black;
-    border: 1px solid black;
-    border-radius: 4px;
-    padding: 20px;
-    width: 500px;
-    margin-bottom: 20px;
-    background-color: rgba(255, 255, 255, 0.932);
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-  }
-  
-  .recap-item p {
-    margin-bottom: 10px;
-  }
-  
-  .recap-item strong {
-    font-weight: bold;
-  }
-.modifbackin{
-    background-image: url("./../../assets/images/fond.jpg");
-         background-size: cover; 
-        background-repeat: no-repeat;
-        max-width: auto; 
-        max-height: auto;
-  
+.reservation-page-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f0f0f0;
+  padding: 20px;
 }
-input {
-  box-shadow: 0 0 100000px rgba(218, 165, 32, 0.884);
-  width: 100%; /* Remplit la largeur disponible */
-  padding: 8px; /* Ajoute un espace à l'intérieur de l'input */
-  box-sizing: border-box; /* Inclut le padding dans la largeur */
+
+.reservation-page-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+}
+
+.book-image {
+  width: 100px;
+  height: 150px;
+  object-fit: cover;
+  margin-bottom: 20px;
+}
+
+.reservation-page-content h2 {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.reservation-page-content p {
+  font-size: 18px;
+  margin-bottom: 20px;
+}
+
+.reservation-page-content form {
+  display: flex;
+  flex-direction: column;
+}
+
+.reservation-page-content form label {
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.reservation-page-content form input {
+  padding: 10px;
+  font-size: 16px;
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.reservation-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.reservation-button:hover {
+  background-color: #0056b3;
 }

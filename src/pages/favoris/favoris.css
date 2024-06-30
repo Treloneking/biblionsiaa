@@ -1,0 +1,44 @@
+.cards-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+}
+
+.card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  width: 200px;
+  padding: 16px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  transition: transform 0.2s;
+}
+
+.card:hover {
+  transform: scale(1.05);
+}
+
+.card img {
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+
+.card-body {
+  text-align: center;
+}
+
+.card-title {
+  font-size: 1.2em;
+  margin: 8px 0;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.pagination .active {
+  font-weight: bold;
+}

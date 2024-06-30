@@ -66,7 +66,7 @@
 .nav-text a {
     text-decoration: none;
     color: #f5f5f5;
-    font-size: 18px;
+    font-size: 1.9rem;
     width: 100%;
     display: flex;
     align-items: center;
@@ -79,12 +79,12 @@
 }
 
 .bienvenue {
-    font-size: 1rem;
+    font-size: 2rem;
     color: #fff;
     font-weight: bold;
 }
 .intro{
-background-image: url('../../../../../Desktop/tdb-2069-a-1500_1760d444aee707486ef5aaa519e5253b.jpeg');
+background-image: url('../../assets/images/pexels-photo-4102712.webp');
 background-repeat: no-repeat;
 background-size: cover;
 height: 200px;
@@ -196,56 +196,17 @@ footer.end {
     background-color: transparent;
     border: none;
     color: #f5f5f5;
-    font-size: 18px;
+    font-size: 1.5rem;
     display: flex;
     align-items: center;
     padding: 10px 20px;
     cursor: pointer;
+
 }
 
 .boutonlogout:hover {
-    color: #1a83ff;
+    background-color: #1a83ff;
 }
-
-
-/*  */
-
-
-.modalN {
-    font-size: 12px;
-  }
-  .modalN > .header {
-    width: 100%;
-    border-bottom: 1px solid gray;
-    font-size: 18px;
-    text-align: center;
-    padding: 5px;
-  }
-  .modalN > .content {
-    width: 100%;
-    padding: 10px 5px;
-  }
-  .modalN > .actions {
-    width: 100%;
-    padding: 10px 5px;
-    margin: auto;
-    text-align: center;
-  }
-  .modalN > .close {
-    cursor: pointer;
-    position: absolute;
-    display: block;
-    padding: 2px 5px;
-    line-height: 20px;
-    right: -10px;
-    top: -10px;
-    font-size: 24px;
-    background: #ffffff;
-    border-radius: 18px;
-    border: 1px solid #cfcece;
-  }
- 
-
 .popup-content .close {
     position: absolute;
     top: 10px;
@@ -254,8 +215,6 @@ footer.end {
     border: none;
     font-size: 20px;
     cursor: pointer;
-}
-.popup-content  {
 }
 
 .book-image-popup {
@@ -269,10 +228,130 @@ footer.end {
     height: 100%;
 }
 .popup-text {
-    background-color: red;
+    background-color: #444;
     color: #000000;
-    height: 480px;
-    width: 480px;
+    height: 0%;
+    width: 500px;
     border-radius: 17px;
-    margin-left: auto;
+}
+/* Global styles */
+body.popup-open {
+    overflow: hidden; /* Prevents scrolling when popup is open */
+}
+
+/* Popup styles */
+.popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.popup-inner {
+    position: relative;
+    background: white;
+    width: 80%;
+    max-width: 800px; /* Max width of popup */
+    border-radius: 10px;
+    overflow: hidden; /* Ensures the content doesn't overflow */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    animation: popup-animation 0.3s ease-out; /* Animation for popup */
+    display: flex;
+    flex-direction: row;
+}
+
+@keyframes popup-animation {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.popup-header {
+    background-color: goldenrod; /* Header background */
+    color: white;
+    padding: 20px;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    width: 100%;
+}
+
+.popup-content {
+    display: flex;
+    flex-direction: row;
+    padding: 20px;
+}
+
+.popup-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    margin-right: 20px;
+    flex: 1;
+}
+
+.popup-details {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.popup-details p {
+    margin: 10px 0;
+}
+
+.popup-footer {
+    display: flex;
+    justify-content: center;
+    padding: 100px;
+    background-color: #0b233b00;
+    height: 10px;
+    width: 1px;
+}
+
+.popup-footer button {
+    margin: 0 10px;
+    padding: 10px 20px;
+    border: none;
+    background-color: goldenrod;
+    color: white;
+    cursor: pointer;
+    border-radius: 5px;
+    height: 40px;
+    transition: background-color 0.3s ease;
+}
+
+.popup-footer button:hover {
+    background-color: darkgoldenrod;
+}
+
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    border: none;
+    font-size: 1.9rem;
+    font-weight: 900;
+}
+/* Image size for popup */
+.popup-content img {
+    width: 200px; /* Define the width */
+    height: auto; /* Maintain aspect ratio */
+    max-height: 300px; /* Optional: limit the height */
+    object-fit: cover; /* Ensures the image covers the given dimensions */
+    border-radius: 10px; /* Optional: keep the rounded corners */
+    margin-right: 20px;
+    flex: 1;
 }

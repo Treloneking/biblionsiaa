@@ -30,6 +30,16 @@
     bottom: 0;
     left: 0;
 }
+.form-group {
+  flex: 0 0 calc(50% - 20px); /* Définit la largeur de chaque groupe à 50% moins les marges */
+  margin: 10px; /* Marge entre chaque groupe */
+}
+
+label {
+  display: block; /* Affiche le label en bloc */
+  margin-bottom: 5px; /* Marge sous le label */
+}
+
 .bouton{
     margin: 10px;
     border-radius: 10px;

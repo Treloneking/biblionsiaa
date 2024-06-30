@@ -4,6 +4,13 @@ import React from 'react';
 import * as IoIcons from "react-icons/io";
 export const SidebarData =[
 
+
+    {
+        title: 'Home',
+        path: '/app/acceuil',
+        icon: <IoIcons.IoIosHome/>,
+        cName:"nav-text"
+    },
 {
     title: "Favoris",
     path: "/app/favoris",
