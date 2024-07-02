@@ -24,7 +24,7 @@ const Login = ({ onLogin }) => {
         // Appeler la fonction onLogin pour mettre à jour l'état d'authentification dans App.jsx
         onLogin();
         // Rediriger vers /app en cas de succès
-        history.push('/app');
+        history.push('/app/acceuil');
       }
     } catch (err) {
       if (err.response && err.response.status === 401) {

@@ -1,23 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { useHistory, Link } from 'react-router-dom';
-import './../../component/navbar/navbar.css';
+import { useHistory } from 'react-router-dom';
 import Slider from 'react-slick';
-import "slick-carousel/slick/slick.css"; 
-import "slick-carousel/slick/slick-theme.css";
-import * as AiIcons from "react-icons/ai";
-import * as FaIcons from "react-icons/fa";
-import * as IoIcons from "react-icons/io";
-import '../facebi/navix.css';
+import "slick-carousel/slick/slick.css";
 import axios from 'axios';
+import './bargate.css';
+import '../facebi/navix.css';
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    return `${year}`;
+}
 
 function Navix() {
     const [Books, setBooks] = useState([]);
-    const [sidebar, setSidebar] = useState(false);
     const [Prenom, setPrenom] = useState(null);
     const [selectedBook, setSelectedBook] = useState(null);
     const [showFullSummary, setShowFullSummary] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [genre, setGenre] = useState('');
     const history = useHistory();
-    const showSidebar = () => setSidebar(!sidebar);
 
     const handleReserver = (book) => {
         if (book && book.Id_livre) {
@@ -29,21 +31,42 @@ function Navix() {
             console.error('Book id is undefined:', book);
         }
     };
-    
-    
 
     useEffect(() => {
         const storedPrenom = localStorage.getItem('Prenom');
         setPrenom(storedPrenom);
 
-        axios.get('http://localhost:5000/app')
+        fetchBooks();
+    }, []);
+
+    useEffect(() => {
+        fetchBooks();
+    }, [genre]);
+
+    const fetchBooks = () => {
+        let url = 'http://localhost:5000/app';
+        if (genre) {
+            url += `?genre=${genre}`;
+        }
+
+        axios.get(url)
             .then(response => {
-                setBooks(response.data);
+                const books = response.data;
+                const aggregatedBooks = books.reduce((acc, book) => {
+                    const existingBook = acc.find(b => b.Id_livre === book.Id_livre);
+                    if (existingBook) {
+                        existingBook.genres.push(book.Genre_Id_genre);
+                    } else {
+                        acc.push({ ...book, genres: [book.Genre_Id_genre] });
+                    }
+                    return acc;
+                }, []);
+                setBooks(aggregatedBooks);
             })
             .catch(error => {
                 console.error('Error fetching books:', error);
             });
-    }, []);
+    };
 
     const handleLogOut = () => {
         localStorage.removeItem('token');
@@ -53,7 +76,7 @@ function Navix() {
 
     const openPopup = (book) => {
         setSelectedBook(book);
-        setShowFullSummary(false); // Reset show full summary when opening a new popup
+        setShowFullSummary(false);
     };
 
     const closePopup = () => {
@@ -72,17 +95,29 @@ function Navix() {
         return summary.slice(0, limit) + '... ';
     };
 
+    const handleSearchChange = (event) => {
+        setSearchTerm(event.target.value);
+    };
+
+    const handleGenreChange = (event) => {
+        setGenre(event.target.value);
+    };
+
+    const filteredBooks = Books.filter(book =>
+        book.Titre.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
     const settings = {
         dots: true,
         infinite: true,
         speed: 500,
-        slidesToShow: 6,
-        slidesToScroll: 1,
+        slidesToShow: Math.min(filteredBooks.length, 4),
+        slidesToScroll: 4,
         responsive: [
             {
                 breakpoint: 1024,
                 settings: {
-                    slidesToShow: 3,
+                    slidesToShow: Math.min(filteredBooks.length, 3),
                     slidesToScroll: 1,
                     infinite: true,
                     dots: true
@@ -91,7 +126,7 @@ function Navix() {
             {
                 breakpoint: 600,
                 settings: {
-                    slidesToShow: 2,
+                    slidesToShow: Math.min(filteredBooks.length, 2),
                     slidesToScroll: 1,
                     initialSlide: 2
                 }
@@ -111,73 +146,70 @@ function Navix() {
             <div className='intro'>
                 <a className='texte'>Découvrez un monde de connaissances à portée de clic! Notre bibliothèque en ligne 
                 <br/>vous offre un accès illimité à une vaste collection de livres, articles, et ressources académiques,
-                <br/> disponible 24 heures sur 24, 7 jours sur 7. Que vous soyez un étudiant, un chercheur, ou simplement
+                <br/> disponible 24 heures sur 24, 7 jours sur 7. Que vous soyez un chercheur, ou simplement
                 <br/> un passionné de lecture, vous trouverez ici tout ce dont vous avez besoin pour nourrir votre esprit et enrichir votre savoir.
                 </a>
             </div>
             <div className='face-biblio'> 
                 <div className='title'><h2>Livres proposés</h2></div>
 
-                {Array.isArray(Books) && Books.length > 0 ? (
-                    <Slider {...settings}>
-                        {Books.map((item, index) => (
-                            <div key={index} className="card" onClick={() => openPopup(item)}>
-                                <img src={`data:image/jpeg;base64,${item.photo}`} alt={item.Titre} className="book-image" />
-                                <h3>{item.Titre}</h3>
-                                <p>{item.Auteur}</p>
+                <input
+                    type="text"
+                    placeholder="Rechercher par titre..."
+                    value={searchTerm}
+                    onChange={handleSearchChange}
+                    className="search-input"
+                />
+
+                <select onChange={handleGenreChange} value={genre} className="genre-select">
+                    <option value="">Tous les genres</option>
+                    <option value="Biographie">Biographie</option>
+                    <option value="Business">Business</option>
+                    <option value="Communication">Communication</option>
+                    <option value="Développement personnel">Développement personnel</option>
+                    <option value="Éducation">Éducation</option>
+                    <option value="Entrepreneuriat">Entrepreneuriat</option>
+                    <option value="Fiction">Fiction</option>
+                    <option value="Finance">Finance</option>
+                    <option value="Finance personnelle">Finance personnelle</option>
+                    <option value="Histoire">Histoire</option>
+                    <option value="Innovation">Innovation</option>
+                    <option value="Inspiration">Inspiration</option>
+                    <option value="Management">Management</option>
+                    <option value="Médecine">Médecine</option>
+                    <option value="Motivation">Motivation</option>
+                    <option value="Non-fiction">Non-fiction</option>
+                    <option value="Philosophie">Philosophie</option>
+                    <option value="Productivité">Productivité</option>
+                    <option value="Psychologie">Psychologie</option>
+                    <option value="Science">Science</option>
+                    <option value="Technologie">Technologie</option>
+                </select>
+
+                {Array.isArray(filteredBooks) && filteredBooks.length > 0 ? (
+                    filteredBooks.length === 1 ? (
+                        <div className="single-book">
+                            <div className="card" onClick={() => openPopup(filteredBooks[0])}>
+                                <img src={`data:image/jpeg;base64,${filteredBooks[0].photo}`} alt={filteredBooks[0].Titre} className="book-image" />
+                                <h3>{filteredBooks[0].Titre}</h3>
+                                <p>{filteredBooks[0].Auteur}</p>
                             </div>
-                        ))}
-                    </Slider>
+                        </div>
+                    ) : (
+                        <Slider {...settings}>
+                            {filteredBooks.map((item, index) => (
+                                <div key={index} className="card" onClick={() => openPopup(item)}>
+                                    <img src={`data:image/jpeg;base64,${item.photo}`} alt={item.Titre} className="book-image" />
+                                    <h3>{item.Titre}</h3>
+                                    <p>{item.Auteur}</p>
+                                </div>
+                            ))}
+                        </Slider>
+                    )
                 ) : (
-                    <p>Aucun livre disponible</p>
+                    <p>Aucun livre disponible sur ce titre</p>
                 )}
-                
-                <div className='middle'>
-                    <h1>A la découverte du milieu professionnel avec des écritures</h1>
-                </div>
-                <div className='title'><h2>Entrepreneuriat</h2></div>
-                {Array.isArray(Books) && Books.length > 0 ? (
-                    <Slider {...settings}>
-                        {Books.map((item, index) => (
-                            <div key={index} className="card" onClick={() => openPopup(item)}>
-                                <img src={`data:image/jpeg;base64,${item.photo}`} alt={item.Titre} className="book-image" />
-                                <h3>{item.Titre}</h3>
-                                <p>{item.Auteur}</p>
-                            </div>
-                        ))}
-                    </Slider>
-                ) : (
-                    <p>Aucun livre disponible</p>
-                )}
-                <div className='title'><h2>Biographie</h2></div>
-                {Array.isArray(Books) && Books.length > 0 ? (
-                    <Slider {...settings}>
-                        {Books.map((item, index) => (
-                            <div key={index} className="card" onClick={() => openPopup(item)}>
-                                <img src={`data:image/jpeg;base64,${item.photo}`} alt={item.Titre} className="book-image" />
-                                <h3>{item.Titre}</h3>
-                                <p>{item.Auteur}</p>
-                            </div>
-                        ))}
-                    </Slider>
-                ) : (
-                    <p>Aucun livre disponible</p>
-                )}
-                <div className='title'><h2>Finance</h2></div>
-                {Array.isArray(Books) && Books.length > 0 ? (
-                    <Slider {...settings}>
-                        {Books.map((item, index) => (
-                            <div key={index} className="card" onClick={() => openPopup(item)}>
-                                <img src={`data:image/jpeg;base64,${item.photo}`} alt={item.Titre} className="book-image" />
-                                <h3>{item.Titre}</h3>
-                                <p>{item.Auteur}</p>
-                            </div>
-                        ))}
-                    </Slider>
-                ) : (
-                    <p>Aucun livre disponible</p>
-                )}
-                </div>
+            </div>
 
             {selectedBook && (
                 <div className="popup">
@@ -188,10 +220,10 @@ function Navix() {
                             <div className="popup-details">
                                 <h2>{selectedBook.Titre}</h2>
                                 <p><strong>Auteur:</strong> {selectedBook.Auteur}</p>
-                                <p><strong>Genre:</strong> {selectedBook.Genre_Id_genre}</p>
-                                <p><strong>Date de publication:</strong> {selectedBook.Date_publication}</p>
+                                <p><strong>Genres:</strong> {selectedBook.genres.join(', ')}</p>
+                                <p><strong>Date de publication:</strong> {formatDate(selectedBook.Date_publication)}</p>
                                 <p>
-                                    <strong>Résumé:</strong> 
+                                    <strong>Résumé: </strong> 
                                     {showFullSummary ? selectedBook.resume : truncateSummary(selectedBook.resume, 100)}
                                     {!showFullSummary && selectedBook.resume && selectedBook.resume.length > 100 && (
                                         <span className="more-link" onClick={toggleFullSummary}>plus</span>

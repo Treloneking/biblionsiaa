@@ -22,7 +22,7 @@ const App = () => {
         <Switch>
           <PrivateRoute path="/app" component={Acceuil} isAuthenticated={isAuthenticated} />
           <Route path="/">
-            {isAuthenticated ? <Redirect to="/app" /> : <Login onLogin={handleLogin} />}
+            {isAuthenticated ? <Redirect to="/app/acceuil" /> : <Login onLogin={handleLogin} />}
           </Route>
         </Switch>
       </Router>

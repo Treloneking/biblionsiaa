@@ -71,7 +71,35 @@ const authenticateToken = (req, res, next) => {
 
 
 app.get('/app', (req, res) => {
-  const query = 'SELECT * FROM livre'; 
+  const { genre } = req.query;
+  let query = `SELECT * FROM livre
+               LEFT JOIN genre_livre gb ON livre.Id_livre = gb.Livre_Id_livre
+               WHERE statut='Disponible'`;
+
+  if (genre) {
+    query += ` AND gb.Genre_Id_genre = '${genre}'`;
+  }
+
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('Error fetching books:', err);
+      res.status(500).send('Error fetching books');
+      return;
+    }
+
+    const books = results.map(book => {
+      return {
+        ...book,
+        photo: book.photo ? Buffer.from(book.photo).toString('base64') : null
+      };
+    });
+
+    res.json(books);
+  });
+});
+
+app.get('/app/favoris', async (req, res) => {
+   const query = 'SELECT * FROM livre '; 
   db.query(query, (err, results) => {
       if (err) {
           console.error('Error fetching books:', err);
@@ -88,65 +116,49 @@ app.get('/app', (req, res) => {
     res.json(books);
 });
 });
-app.get('/app/favoris', (req, res) => {
-  const userId = req.query.userId; // Get user ID from query parameters
-  const page = parseInt(req.query.page) || 1; // Get page number from query parameters
-  const limit = parseInt(req.query.limit) || 5; // Get limit from query parameters
-  const offset = (page - 1) * limit; // Calculate offset
-
-  const query = `
-      SELECT * FROM livre
-      WHERE user_id = ?
-      LIMIT ?, ?
-  `;
-
-  db.query(query, [userId, offset, limit], (err, results) => {
-      if (err) {
-          console.error('Error fetching books:', err);
-          res.status(500).send('Error fetching books');
-          return;
-      }
-
-      const totalQuery = `
-          SELECT COUNT(*) AS total FROM livre
-          WHERE user_id = ?
-      `;
-
-      db.query(totalQuery, [userId], (err, countResults) => {
-          if (err) {
-              console.error('Error fetching total count:', err);
-              res.status(500).send('Error fetching total count');
-              return;
-          }
-
-          const total = countResults[0].total;
-          const books = results.map(book => ({
-              ...book,
-              photo: book.photo ? Buffer.from(book.photo).toString('base64') : null
-          }));
-
-          res.json({ favorites: books, total });
-      });
-  });
-});
-
-
-
 app.post('/app/reservation', (req, res) => {
-  const { date_emprunt, User_Id_user, Livre_Id_livre } = req.body;
+  const { date_emprunt, date_retour, User_Id_user, Livre_Id_livre } = req.body;
 
-  const query = `INSERT INTO emprunter (date_emprunt, User_Id_user, Livre_Id_livre) VALUES (?, ?, ?)`;
-  const values = [date_emprunt, User_Id_user, Livre_Id_livre];
+  // Calculate the number of days between date_emprunt and date_retour
+  const startDate = new Date(date_emprunt);
+  const endDate = new Date(date_retour);
+  const daysReserved = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
 
-  db.query(query, values, (error, results) => {
-    if (error) {
-      console.error('Erreur lors de l\'insertion de la réservation :', error);
-      return res.status(500).json({ message: 'Erreur lors de la création de la réservation' });
+  if (daysReserved > 4) {
+    return res.status(400).json({ message: 'Vous ne pouvez pas réserver un livre pour plus de 4 jours' });
+  }
+
+  // Vérifiez si une réservation existe déjà pour ce livre et ces dates
+  const checkQuery = `SELECT * FROM emprunter WHERE Livre_Id_livre = ? AND ((date_emprunt BETWEEN ? AND ?) OR (date_retour BETWEEN ? AND ?))`;
+  const checkValues = [Livre_Id_livre, date_emprunt, date_retour, date_emprunt, date_retour];
+
+  db.query(checkQuery, checkValues, (checkError, checkResults) => {
+    if (checkError) {
+      console.error('Erreur lors de la vérification des réservations existantes :', checkError);
+      return res.status(500).json({ message: 'Erreur lors de la vérification des réservations existantes' });
     }
 
-    res.status(201).json({ message: 'Réservation réussie', results });
+    if (checkResults.length > 0) {
+      return res.status(400).json({ message: 'Ce livre est déjà réservé pour les dates spécifiées' });
+    }
+
+    // Si aucune réservation n'existe pour ces dates, insérez la nouvelle réservation
+    const query = `INSERT INTO emprunter (date_emprunt, date_retour, User_Id_user, Livre_Id_livre) VALUES (?, ?, ?, ?)`;
+    const values = [date_emprunt, date_retour, User_Id_user, Livre_Id_livre];
+
+    db.query(query, values, (error, results) => {
+      if (error) {
+        console.error('Erreur lors de l\'insertion de la réservation :', error);
+        return res.status(500).json({ message: 'Erreur lors de la création de la réservation' });
+      }
+
+      res.status(201).json({ message: 'Réservation réussie', results });
+    });
   });
 });
+
+
+
 
 app.listen(port, () => {
   console.log(`Serveur démarré sur le port ${port}`);

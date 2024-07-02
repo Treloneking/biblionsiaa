@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import ReactPaginate from 'react-paginate';
-import './favoris.css'; // Ensure you have the CSS file for styling
+import './favoris.css'; // Assurez-vous d'avoir le fichier CSS pour le style
 
 const Favoris = () => {
     const [favorites, setFavorites] = useState([]);
@@ -12,7 +12,7 @@ const Favoris = () => {
     useEffect(() => {
         const fetchFavorites = async () => {
             try {
-                const userId = localStorage.getItem('Id_user'); // Assumes user ID is stored in local storage
+                const userId = localStorage.getItem('Id_user'); // Suppose que l'ID utilisateur est stocké dans le local storage
                 const response = await axios.get(`/app/favoris`, {
                     params: {
                         userId: userId,
@@ -23,7 +23,7 @@ const Favoris = () => {
                 setFavorites(response.data.favorites);
                 setPageCount(Math.ceil(response.data.total / itemsPerPage));
             } catch (error) {
-                console.error('Error fetching favorite books:', error);
+                console.error('Erreur lors de la récupération des livres favoris:', error);
             }
         };
 
@@ -49,8 +49,8 @@ const Favoris = () => {
                 ))}
             </div>
             <ReactPaginate
-                previousLabel={'previous'}
-                nextLabel={'next'}
+                previousLabel={'Précédent'}
+                nextLabel={'Suivant'}
                 breakLabel={'...'}
                 breakClassName={'break-me'}
                 pageCount={pageCount}
