@@ -10,8 +10,9 @@ if (!jwtSecret) {
   console.error('La clé secrète JWT n\'est pas définie dans les variables d\'environnement.');
   process.exit(1); // Arrête le processus Node en cas d'erreur critique
 }
-
+const ldap = require('ldapjs');
 const express = require('express');
+const multer = require('multer');
 const mysql = require('mysql');
 const bodyParser = require('body-parser');
 const app = express();
@@ -27,15 +28,27 @@ const db = mysql.createConnection({
   database: 'biblio'
 });
 
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 // Middleware pour parser le corps des requêtes
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cors());
 
 // Route de connexion
+// Endpoint pour la connexion
 app.post('/login', (req, res) => {
   const { Id_user, Mot_de_passe } = req.body;
 
-  const sql = 'SELECT Id_user ,Prenom, Nom FROM utilisateur WHERE Id_user = ? AND Mot_de_passe = ?';
+  // Vérifier si l'utilisateur est administrateur
+  if (Id_user === 'Bibliothequensia' && Mot_de_passe === 'Administrateurbiblio') {
+    // Créer un token JWT pour l'administrateur
+    const token = jwt.sign({ Id_user, Prenom: 'Administrateur', Nom: 'Bibliothequensia' }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    return res.status(200).json({ message: 'Connexion réussie en tant qu\'administrateur', token, Id_user: 'Bibliothequensia', Prenom: 'Admin', Nom: 'Bibliothequensia' });
+  }
+
+  // Sinon, chercher l'utilisateur dans la base de données
+  const sql = 'SELECT Id_user, Prenom, Nom FROM utilisateur WHERE Id_user = ? AND Mot_de_passe = ?';
   const values = [Id_user, Mot_de_passe];
 
   db.query(sql, values, (err, results) => {
@@ -45,15 +58,15 @@ app.post('/login', (req, res) => {
     }
 
     if (results.length > 0) {
-      const jwtSecret = process.env.JWT_SECRET;
       const { Prenom, Nom, Id_user } = results[0];
-      const token = jwt.sign({ Id_user, Prenom, Nom }, jwtSecret, { expiresIn: '1h' });
-      return res.status(200).json({ message: 'Connexion réussie', token, Id_user,Prenom, Nom });
+      const token = jwt.sign({ Id_user, Prenom, Nom }, process.env.JWT_SECRET, { expiresIn: '1h' });
+      return res.status(200).json({ message: 'Connexion réussie', token, Id_user, Prenom, Nom });
     } else {
       return res.status(401).json({ error: 'Identifiants invalides' });
     }
   });
 });
+
 
 // Middleware pour vérifier les tokens JWT
 const authenticateToken = (req, res, next) => {
@@ -70,11 +83,13 @@ const authenticateToken = (req, res, next) => {
 };
 
 
+
 app.get('/app', (req, res) => {
   const { genre } = req.query;
-  let query = `SELECT * FROM livre
-               LEFT JOIN genre_livre gb ON livre.Id_livre = gb.Livre_Id_livre
-               WHERE statut='Disponible'`;
+  let query = `SELECT * 
+FROM livre
+LEFT JOIN genre_livre gb ON livre.Id_livre = gb.Livre_Id_livre
+WHERE statut = 'Disponible'`;
 
   if (genre) {
     query += ` AND gb.Genre_Id_genre = '${genre}'`;
@@ -98,24 +113,27 @@ app.get('/app', (req, res) => {
   });
 });
 
-app.get('/app/favoris', async (req, res) => {
-   const query = 'SELECT * FROM livre '; 
-  db.query(query, (err, results) => {
-      if (err) {
-          console.error('Error fetching books:', err);
-          res.status(500).send('Error fetching books');
-          return;
-      }
-      const books = results.map(book => {
-        return {
-            ...book,
-            photo: book.photo ? Buffer.from(book.photo).toString('base64') : null
-        };
-    });
+app.post('/app/proposition', (req, res) => {
+  const { titre_livre, auteur, genre, user_id_user, user_name } = req.body;
 
-    res.json(books);
+  if (!titre_livre || !auteur || !genre || !user_id_user || !user_name) {
+    return res.status(400).json({ message: 'Tous les champs sont obligatoires.' });
+  }
+
+  const query = 'INSERT INTO proposition (titre_livre, auteur, genre, user_id_user, user_name) VALUES (?, ?, ?, ?, ?)';
+  const values = [titre_livre, auteur, genre, user_id_user, user_name];
+
+  db.query(query, values, (err, results) => {
+    if (err) {
+      console.error('Erreur lors de l\'insertion de la proposition :', err);
+      return res.status(500).json({ message: 'Erreur lors de la création de la proposition.' });
+    }
+
+    res.status(201).json({ message: 'Proposition réussie', results });
+  });
 });
-});
+
+
 app.post('/app/reservation', (req, res) => {
   const { date_emprunt, date_retour, User_Id_user, Livre_Id_livre } = req.body;
 
@@ -156,10 +174,56 @@ app.post('/app/reservation', (req, res) => {
     });
   });
 });
+app.get('/app/demande', (req, res) => {
+  const query = `
+  SELECT * FROM proposition
+  `;
+  
+  db.query(query, (error, results, fields) => {
+    if (error) {
+      console.error('Error fetching contracts:', error);
+      res.status(500).json({ error: 'Une erreur s\'est produite lors de la récupération des archives.' });
+    } else {
+      res.json(results);
+    }
+  });
+});
 
+app.get('/app/Reserver', (req, res) => {
+  const query = `
+  SELECT *
+FROM emprunter e
+LEFT JOIN livre l ON e.Livre_Id_livre = l.Id_livre
+LEFT JOIN utilisateur u ON e.User_Id_user = u.Id_user;
 
+  `;
+  
+  db.query(query, (error, results, fields) => {
+    if (error) {
+      console.error('Error fetching contracts:', error);
+      res.status(500).json({ error: 'Une erreur s\'est produite lors de la récupération des archives.' });
+    } else {
+      res.json(results);
+    }
+  });
+});
 
+app.post('/app/ajout-livre', upload.single('photo'), (req, res) => {
+  const { Titre, Date_publication, Auteur, genre,resume } = req.body;
+  const photo = req.file.buffer; // Le fichier photo est maintenant dans req.file.buffer
+
+  const sql = 'INSERT INTO livres (Titre, Date_publication, Auteur, genre,  photo, resume,) VALUES (?, ?, ?, ?, ?, ?)';
+  const values = [Titre,Date_publication, Auteur, genre, photo, resume];
+
+  db.query(sql, values, (err, result) => {
+    if (err) {
+      console.error('Error inserting book:', err);
+      return res.status(500).json({ error: 'Erreur lors de l\'insertion du livre' });
+    }
+    return res.status(200).json({ message: 'Livre inséré avec succès' });
+  });
+});
 
 app.listen(port, () => {
-  console.log(`Serveur démarré sur le port ${port}`);
+  console.log(`Bonjour chef le serveur a démarré sur le port ${port}`);
 });

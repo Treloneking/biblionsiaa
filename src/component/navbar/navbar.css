@@ -1,5 +1,5 @@
 .nav-bar {
-    background-color: goldenrod;
+    background-color: steelblue;
     height: 60px;
     display: flex;
     justify-content: space-between;
@@ -24,7 +24,7 @@
 }
 
 .nav-menu {
-    background-color: goldenrod;
+    background-color: steelblue;
     width: 250px;
     height: 100vh;
     display: flex;
@@ -46,7 +46,7 @@
 }
 
 .navbar-toggle {
-    background-color: goldenrod;
+    background-color: steelblue;
     width: 100%;
     display: flex;
     justify-content: start;
@@ -75,7 +75,7 @@
 }
 
 .nav-text a:hover {
-    background-color: #1a83ff;
+    background-color:  #0a58b3;
 }
 
 .bienvenue {
@@ -205,7 +205,7 @@ footer.end {
 }
 
 .boutonlogout:hover {
-    background-color: #1a83ff;
+    background-color: rgba(255, 0, 0, 0.582);
 }
 .popup-content .close {
     position: absolute;

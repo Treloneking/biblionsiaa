@@ -15,14 +15,20 @@ const Login = ({ onLogin }) => {
     e.preventDefault();
     try {
       const response = await axios.post('http://localhost:5000/login', { Id_user, Mot_de_passe });
+
       if (response.status === 200) {
         // Stocker le token JWT dans le localStorage
         localStorage.setItem('token', response.data.token);
-        localStorage.setItem('Prenom',response.data.Prenom);
-        localStorage.setItem('Nom',response.data.Nom);
-        localStorage.setItem('Id_user',response.data.Id_user);
+        localStorage.setItem('Prenom', response.data.Prenom);
+        localStorage.setItem('Nom', response.data.Nom);
+        localStorage.setItem('Id_user', response.data.Id_user);
+
+        // Vérifier le rôle de l'utilisateur
+        const isAdmin = response.data.Id_user === 'Bibliothequensia';
+        localStorage.setItem('role', isAdmin ? 'admin' : 'user');
         // Appeler la fonction onLogin pour mettre à jour l'état d'authentification dans App.jsx
         onLogin();
+  
         // Rediriger vers /app en cas de succès
         history.push('/app/acceuil');
       }
@@ -34,7 +40,7 @@ const Login = ({ onLogin }) => {
       }
     }
   };
-
+  
   return (
     <div className='loginBackground'>
       <form onSubmit={handleSubmit} className='formulaireconnect'>

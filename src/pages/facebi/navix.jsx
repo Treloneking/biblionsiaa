@@ -221,7 +221,7 @@ function Navix() {
                                 <h2>{selectedBook.Titre}</h2>
                                 <p><strong>Auteur:</strong> {selectedBook.Auteur}</p>
                                 <p><strong>Genres:</strong> {selectedBook.genres.join(', ')}</p>
-                                <p><strong>Date de publication:</strong> {formatDate(selectedBook.Date_publication)}</p>
+                                <p><strong>Date de publication:</strong> {selectedBook.Date_publication}</p>
                                 <p>
                                     <strong>Résumé: </strong> 
                                     {showFullSummary ? selectedBook.resume : truncateSummary(selectedBook.resume, 100)}

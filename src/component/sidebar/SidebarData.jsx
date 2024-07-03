@@ -1,26 +1,57 @@
-//SidebarData.jsx
-import { title } from 'process';
 import React from 'react';
 import * as IoIcons from "react-icons/io";
-export const SidebarData =[
+import { Link } from 'react-router-dom'; // Importer Link depuis react-router-dom
 
-
+const SidebarData = ({ isAdmin }) => {
+  const sidebarItems = [
     {
-        title: 'Home',
+        title: 'Acceuil',
         path: '/app/acceuil',
         icon: <IoIcons.IoIosHome/>,
-        cName:"nav-text"
-    },
-{
-    title: "Favoris",
-    path: "/app/favoris",
-    icon: <IoIcons.IoIosStar/>,
-    cName: "nav-text"
-},
-{
-    title: "contact",
-    path: "/app/contact",
-    icon: <IoIcons.IoIosPeople/>,
-    cName: "nav-text"
-}
-]
+        cName: 'nav-text'
+      },
+      {
+          title: 'Proposition',
+          path: '/app/proposition',
+          icon: <IoIcons.IoIosPaper/>,
+          cName: 'nav-text',
+          hidden: isAdmin
+        },
+        {
+          title: 'Demande',
+          path: '/app/demande',
+          icon: <IoIcons.IoIosPaper/>,
+          cName: 'nav-text',
+          hidden: !isAdmin
+        },
+        {
+            title: 'Livre',
+            path: '/app/ajout-livre',
+            icon: <IoIcons.IoIosPaper/>,
+            cName: 'nav-text',
+            hidden: !isAdmin
+         },
+         {
+            title: 'Reserver',
+            path: '/app/reserver',
+            icon: <IoIcons.IoIosPaper/>,
+            cName: 'nav-text',
+            hidden: !isAdmin
+         }
+        
+    ];
+
+  // Filtrer les éléments visibles dans la barre latérale
+  const visibleSidebarItems = sidebarItems.filter(item => !item.hidden);
+
+  return visibleSidebarItems.map((item, index) => (
+    <li key={index} className={item.cName}>
+      <Link to={item.path}> {/* Utiliser Link ici pour créer des liens */}
+        {item.icon}
+        <span>{item.title}</span>
+      </Link>
+    </li>
+  ));
+};
+
+export default SidebarData;
