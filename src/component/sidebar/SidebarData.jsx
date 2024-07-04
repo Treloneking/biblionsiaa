@@ -11,7 +11,7 @@ const SidebarData = ({ isAdmin }) => {
         cName: 'nav-text'
       },
       {
-          title: 'Proposition',
+          title: "Envie d'un livre",
           path: '/app/proposition',
           icon: <IoIcons.IoIosPaper/>,
           cName: 'nav-text',
@@ -27,7 +27,7 @@ const SidebarData = ({ isAdmin }) => {
         {
             title: 'Livre',
             path: '/app/ajout-livre',
-            icon: <IoIcons.IoIosPaper/>,
+            icon: <IoIcons.IoIosBook/>,
             cName: 'nav-text',
             hidden: !isAdmin
          },

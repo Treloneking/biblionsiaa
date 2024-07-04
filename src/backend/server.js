@@ -1,4 +1,3 @@
-
 // Importez dotenv et chargez les variables d'environnement
 require('dotenv').config({ path: '../../.env' });
 
@@ -10,15 +9,21 @@ if (!jwtSecret) {
   console.error('La clé secrète JWT n\'est pas définie dans les variables d\'environnement.');
   process.exit(1); // Arrête le processus Node en cas d'erreur critique
 }
+const bcrypt = require('bcrypt');
+const jwt = bcrypt(jwtSecret);
+const multer = require('multer');
+const upload = multer({ dest: 'uploads/' });
+const storage = multer.memoryStorage();
 const ldap = require('ldapjs');
 const express = require('express');
-const multer = require('multer');
 const mysql = require('mysql');
 const bodyParser = require('body-parser');
 const app = express();
 const port = 5000;
 const jwt = require('jsonwebtoken');
+const { authenticate } = require('ldap-authentication');
 const cors = require('cors');
+var ActiveDirectory = require('activedirectory');
 
 // Configuration de la connexion à la base de données
 const db = mysql.createConnection({
@@ -28,8 +33,7 @@ const db = mysql.createConnection({
   database: 'biblio'
 });
 
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
+
 // Middleware pour parser le corps des requêtes
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -37,37 +41,93 @@ app.use(cors());
 
 // Route de connexion
 // Endpoint pour la connexion
-app.post('/login', (req, res) => {
+app.post('/login', async (req, res) => {
   const { Id_user, Mot_de_passe } = req.body;
 
-  // Vérifier si l'utilisateur est administrateur
+  // Ajouter automatiquement @nsiaassurances.com si non présent
+  const domain = '@nsiaassurances.com';
+  const username = Id_user.includes(domain) ? Id_user : `${Id_user}${domain}`;
+
   if (Id_user === 'Bibliothequensia' && Mot_de_passe === 'Administrateurbiblio') {
     // Créer un token JWT pour l'administrateur
     const token = jwt.sign({ Id_user, Prenom: 'Administrateur', Nom: 'Bibliothequensia' }, process.env.JWT_SECRET, { expiresIn: '2s' });
     return res.status(200).json({ message: 'Connexion réussie en tant qu\'administrateur', token, Id_user: 'Bibliothequensia', Prenom: 'Admin', Nom: 'Bibliothequensia' });
   }
 
-  // Sinon, chercher l'utilisateur dans la base de données
-  const sql = 'SELECT Id_user, Prenom, Nom FROM utilisateur WHERE Id_user = ? AND Mot_de_passe = ?';
-  const values = [Id_user, Mot_de_passe];
+  try {
+    // Configuration pour l'authentification LDAP
+    const config = {
+      url: 'ldap://10.10.4.4',
+      baseDN: 'dc=nsia,dc=com'
+    };
 
-  db.query(sql, values, (err, results) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).json({ error: 'Erreur de serveur' });
+    const ad = new ActiveDirectory(config);
+    const password = Mot_de_passe;
+
+    // Extraire le prénom et le nom de l'utilisateur
+    const regex = /^([a-zA-Z]+)\.([a-zA-Z]+)@/;
+    const matches = username.match(regex);
+
+    if (!matches || matches.length !== 3) {
+      return res.status(400).json({ message: 'Adresse e-mail non valide' });
     }
 
-    if (results.length > 0) {
-      const { Prenom, Nom, Id_user } = results[0];
-      const token = jwt.sign({ Id_user, Prenom, Nom }, process.env.JWT_SECRET, { expiresIn: '2s' });
-      return res.status(200).json({ message: 'Connexion réussie', token, Id_user, Prenom, Nom });
-    } else {
-      return res.status(401).json({ error: 'Identifiants invalides' });
-    }
-  });
+    const prenom = matches[1];
+    const nom = matches[2];
+
+    // Authenticate
+    ad.authenticate(username, password, function(err, auth) {
+      if (err) {
+        console.log('ERROR: ' + JSON.stringify(err));
+        return res.status(500).json({ message: 'Erreur d\'authentification LDAP' });
+      }
+      if (auth) {
+        // Requête SQL pour vérifier si l'utilisateur existe dans la base de données
+        db.query('SELECT * FROM utilisateur WHERE Email = ?', [username], async function(error, results, fields) {
+          if (error) {
+            console.error('Erreur lors de la vérification de l\'utilisateur dans la base de données :', error);
+            return res.status(500).json({ message: 'Erreur interne du serveur' });
+          }
+
+          // Si l'utilisateur n'existe pas dans la base de données, l'insérer
+          if (results.length === 0) {
+            try {
+              // Création de l'utilisateur dans la base de données
+              db.query('INSERT INTO utilisateur (Nom, Prenom, Email, Mot_de_passe) VALUES (?, ?, ?, ?)', [nom, prenom, username, password], function(err, results, fields) {
+                if (err) {
+                  console.error('Erreur lors de la création de l\'utilisateur dans la base de données :', err);
+                  return res.status(500).json({ message: 'Erreur interne du serveur' });
+                }
+                console.log('Utilisateur créé dans la base de données');
+
+                // Récupérer l'ID de l'utilisateur inséré
+                const newUserId = results.insertId;
+                // Générer le token JWT après la création de l'utilisateur
+                const token = jwt.sign({ Id_user: newUserId, username, Prenom: prenom, Nom: nom }, jwtSecret, { expiresIn: '2h' });
+                return res.status(200).json({ message: 'Connexion réussie', token, Id_user: newUserId, username, Prenom: prenom, Nom: nom });
+              });
+            } catch (error) {
+              console.error('Erreur lors de la création de l\'utilisateur dans la base de données :', error);
+              return res.status(500).json({ message: 'Erreur interne du serveur' });
+            }
+          } else {
+            // Utilisateur trouvé dans la base de données, récupérer l'ID utilisateur
+            const existingUserId = results[0].id; // Assurez-vous que 'id' est bien le nom de la colonne de l'ID utilisateur dans votre table
+            // Générer le token JWT directement
+            const token = jwt.sign({ Id_user: existingUserId, username, Prenom: prenom, Nom: nom }, jwtSecret, { expiresIn: '2h' });
+            return res.status(200).json({ message: 'Connexion réussie', token, Id_user: existingUserId, username, Prenom: prenom, Nom: nom });
+          }
+        });
+      } else {
+        console.log('Authentication failed!');
+        return res.status(401).json({ message: 'Authentification échouée' });
+      }
+    });
+  } catch (error) {
+    console.error('Erreur lors de l\'authentification LDAP :', error);
+    return res.status(500).json({ message: 'Erreur interne du serveur' });
+  }
 });
-
-
 // Middleware pour vérifier les tokens JWT
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
@@ -208,21 +268,19 @@ LEFT JOIN utilisateur u ON e.User_Id_user = u.Id_user;
   });
 });
 
-app.post('/app/ajout-livre', upload.single('photo'), (req, res) => {
-  const { Titre, Date_publication, Auteur, genre,resume } = req.body;
-  const photo = req.file.buffer; // Le fichier photo est maintenant dans req.file.buffer
-
-  const sql = 'INSERT INTO livres (Titre, Date_publication, Auteur, genre,  photo, resume,) VALUES (?, ?, ?, ?, ?, ?)';
-  const values = [Titre,Date_publication, Auteur, genre, photo, resume];
-
-  db.query(sql, values, (err, result) => {
+// Backend pour récupérer les genres existants
+app.get('/app/genres', (req, res) => {
+  const sql = 'SELECT * FROM genre';
+  db.query(sql, (err, results) => {
     if (err) {
-      console.error('Error inserting book:', err);
-      return res.status(500).json({ error: 'Erreur lors de l\'insertion du livre' });
+      console.error('Error fetching genres:', err);
+      return res.status(500).json({ error: 'Erreur lors de la récupération des genres' });
     }
-    return res.status(200).json({ message: 'Livre inséré avec succès' });
+    res.status(200).json(results);
   });
 });
+
+
 
 app.listen(port, () => {
   console.log(`Bonjour chef le serveur a démarré sur le port ${port}`);

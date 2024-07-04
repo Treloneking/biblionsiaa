@@ -134,8 +134,7 @@ function Navix() {
             <div className='intro'>
                 <a className='texte'>Découvrez un monde de connaissances à portée de clic! Notre bibliothèque en ligne 
                 <br/>vous offre un accès illimité à une vaste collection de livres, articles, et ressources académiques,
-                <br/> disponible 24 heures sur 24, 7 jours sur 7. Que vous soyez un chercheur, ou simplement
-                <br/> un passionné de lecture, vous trouverez ici tout ce dont vous avez besoin pour nourrir votre esprit et enrichir votre savoir.
+                <br/> disponible 24 heures sur 24, 7 jours sur 7. 
                 </a>
             </div>
             <div className='face-biblio'> 

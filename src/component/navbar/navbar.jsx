@@ -49,18 +49,20 @@ function Navbar() {
     localStorage.removeItem('role');
     window.location.reload();
   };
-
+  const capitalizeFirstLetter = (string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+  };
 
   return (
     <>
-      <IconContext.Provider value={{ color: 'rgba(0, 0, 0, 0.712)' }}>
+      <IconContext.Provider value={{ color: 'goldenrod' }}>
         <div className='nav-bar'>
           <Link to="/app" className='menu-bars'>
             <FaIcons.FaBars onClick={showSidebar} />
           </Link>
           <marquee>
             <p className='bienvenue'>
-              <FaIcons.FaBook />Bienvenue à la Bibliotheque Numérique de NSIA Mr/Mme {Nom} {Prenom}<FaIcons.FaBook />
+              <FaIcons.FaBook />Bienvenue à la Bibliothèque Numérique de NSIA Mr/Mme {capitalizeFirstLetter(Nom)} {capitalizeFirstLetter(Prenom)}<FaIcons.FaBook />
             </p>
           </marquee>
           <div className='nav-bar-icons'>

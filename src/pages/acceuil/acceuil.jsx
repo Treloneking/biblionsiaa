@@ -3,7 +3,7 @@ import React from 'react';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import Navbar from '../../component/navbar/navbar';
 import Registerperso from '../enregistrement/registerperso';
-import Notif from '../../component/notif/notif';
+
 import Navix from '../facebi/navix';
 import './acceuil.css';
 import Proposition from '../proposition/Proposition';
@@ -20,7 +20,6 @@ function Acceuil() {
           <Route path="/app/acceuil" component={Navix} />
           <Route path="/app/proposition" component={Proposition} />
           <Route path="/app/reservation" component={Registerperso} />
-          <Route path="/app/notification" component={Notif} />
           <Route path="/app/demande" component={Demande}/>
           <Route path="/app/ajout-livre" component={Livre}/>
           <Route path="/app/reserver" component={Reserver}/>
