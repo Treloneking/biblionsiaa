@@ -5,13 +5,7 @@ import "slick-carousel/slick/slick.css";
 import axios from 'axios';
 import './bargate.css';
 import '../facebi/navix.css';
-
-function formatDate(dateString) {
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    return `${year}`;
-}
-
+console.clear();
 function Navix() {
     const [Books, setBooks] = useState([]);
     const [Prenom, setPrenom] = useState(null);
@@ -66,12 +60,6 @@ function Navix() {
             .catch(error => {
                 console.error('Error fetching books:', error);
             });
-    };
-
-    const handleLogOut = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('Prenom');
-        window.location.reload();
     };
 
     const openPopup = (book) => {

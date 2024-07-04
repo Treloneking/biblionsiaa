@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useHistory } from 'react-router-dom';
 import './demande.css';
-
+console.clear();
 function formatDate(dateString) {
   const date = new Date(dateString);
   const year = date.getFullYear();

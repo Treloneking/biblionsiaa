@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 import axios from 'axios';
 import './registerperso.css';
-
+console.clear();
 const Registerperso = () => {
   const location = useLocation();
   const { book } = location.state || {};

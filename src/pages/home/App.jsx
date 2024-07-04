@@ -15,6 +15,14 @@ const App = () => {
   const handleLogin = () => {
     setIsAuthenticated(true);
   };
+  useEffect(() => {
+    const interval = setInterval(() => {
+      console.clear(); // Vider la console chaque seconde
+    }, 1000); // 1000 millisecondes = 1 seconde
+
+    return () => clearInterval(interval); // Nettoyage de l'intervalle lors du démontage du composant
+  }, []);
+
 
   return (
     <div className='fondside'>

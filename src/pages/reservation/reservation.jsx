@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useHistory } from 'react-router-dom';
+console.clear();
 
 
 function formatDate(dateString) {
@@ -16,7 +16,7 @@ function Reserver() {
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10); // Nombre d'éléments par page par défaut
-  const history = useHistory();
+  
 
   useEffect(() => {
     const fetchData = async () => {

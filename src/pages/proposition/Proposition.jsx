@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import './Proposition.css';
-
+console.clear();
 const Proposition = () => {
   const [titre_livre, setTitle] = useState('');
   const [auteur, setAuthor] = useState('');

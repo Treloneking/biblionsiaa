@@ -5,13 +5,11 @@ import Navbar from '../../component/navbar/navbar';
 import Registerperso from '../enregistrement/registerperso';
 import Notif from '../../component/notif/notif';
 import Navix from '../facebi/navix';
-import SidebarData from '../../component/sidebar/SidebarData'; // Import par défaut de SidebarData
 import './acceuil.css';
 import Proposition from '../proposition/Proposition';
 import Demande from '../demnde/demande';
 import Livre from '../Ajout livre/livre';
 import Reserver from '../reservation/reservation';
-
 
 function Acceuil() {
   return (

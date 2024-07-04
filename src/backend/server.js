@@ -43,7 +43,7 @@ app.post('/login', (req, res) => {
   // Vérifier si l'utilisateur est administrateur
   if (Id_user === 'Bibliothequensia' && Mot_de_passe === 'Administrateurbiblio') {
     // Créer un token JWT pour l'administrateur
-    const token = jwt.sign({ Id_user, Prenom: 'Administrateur', Nom: 'Bibliothequensia' }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ Id_user, Prenom: 'Administrateur', Nom: 'Bibliothequensia' }, process.env.JWT_SECRET, { expiresIn: '2s' });
     return res.status(200).json({ message: 'Connexion réussie en tant qu\'administrateur', token, Id_user: 'Bibliothequensia', Prenom: 'Admin', Nom: 'Bibliothequensia' });
   }
 
@@ -59,7 +59,7 @@ app.post('/login', (req, res) => {
 
     if (results.length > 0) {
       const { Prenom, Nom, Id_user } = results[0];
-      const token = jwt.sign({ Id_user, Prenom, Nom }, process.env.JWT_SECRET, { expiresIn: '1h' });
+      const token = jwt.sign({ Id_user, Prenom, Nom }, process.env.JWT_SECRET, { expiresIn: '2s' });
       return res.status(200).json({ message: 'Connexion réussie', token, Id_user, Prenom, Nom });
     } else {
       return res.status(401).json({ error: 'Identifiants invalides' });

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import './livre.css';
-
+console.clear();
 const Livre = () => {
   const [bookData, setBookData] = useState({
     titre: '',

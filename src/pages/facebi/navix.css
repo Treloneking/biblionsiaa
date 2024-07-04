@@ -15,3 +15,8 @@
 .card h3{
  color: goldenrod;
 }
+.genre-select{
+    float: right;
+    border-radius: 10px;
+    
+}

@@ -87,7 +87,7 @@
 background-image: url('../../assets/images/pexels-photo-4102712.webp');
 background-repeat: no-repeat;
 background-size: cover;
-height: 200px;
+height: auto;
 
 }
 body.popup-open {
@@ -139,12 +139,11 @@ body.popup-open {
 
 .card {
     background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    padding: 20px;
+
+
     margin: 10px;
     text-align: center;
-    transition: transform 0.3s;
+  
     max-width: 250px; /* Set a maximum width for the cards */
 }
 
