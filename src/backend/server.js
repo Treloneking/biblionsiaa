@@ -45,7 +45,7 @@ app.post('/login', async (req, res) => {
   const { Id_user, Mot_de_passe } = req.body;
 
   // Ajouter automatiquement @nsiaassurances.com si non présent
-  const domain = '@nsiaassurances.com';
+  const domain = '@';
   const username = Id_user.includes(domain) ? Id_user : `${Id_user}${domain}`;
 
   if (Id_user === 'Bibliothequensia' && Mot_de_passe === 'Administrateurbiblio') {
@@ -57,7 +57,7 @@ app.post('/login', async (req, res) => {
   try {
     // Configuration pour l'authentification LDAP
     const config = {
-      url: 'ldap://10.10.4.4',
+      url: '',
       baseDN: 'dc=nsia,dc=com'
     };
 
