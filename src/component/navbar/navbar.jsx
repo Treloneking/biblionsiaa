@@ -57,9 +57,9 @@ function Navbar() {
     <>
       <IconContext.Provider value={{ color: 'goldenrod' }}>
         <div className='nav-bar'>
-          <Link to="/app" className='menu-bars'>
+          <div  className='menu-bars'>
             <FaIcons.FaBars onClick={showSidebar} />
-          </Link>
+          </div>
           <marquee>
             <p className='bienvenue'>
               <FaIcons.FaBook />Bienvenue à la Bibliothèque Numérique de NSIA Mr/Mme {capitalizeFirstLetter(Nom)} {capitalizeFirstLetter(Prenom)}<FaIcons.FaBook />

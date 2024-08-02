@@ -1,0 +1,34 @@
+.queue-list-container {
+    margin-top: 20px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    width: 100%;
+  }
+  
+  .queue-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+  
+  .queue-table th, .queue-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+  }
+  
+  
+  .queue-table th {
+    background-color: #f2f2f2;
+  }
+  
+  .queue-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  .queue-table tr:hover {
+    background-color: #f1f1f1;
+  }
+  

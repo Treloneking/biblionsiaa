@@ -52,7 +52,7 @@ function Reserver() {
 
   return (
     <div className='search-pag'>
-      <h1>Proposition de livre:</h1>
+      <h1>Reservation de livre:</h1>
 
       <div className="results">
         {error && <p className="error">{error}</p>}
@@ -64,8 +64,7 @@ function Reserver() {
                   <th>Titre du livre</th>
                   <th>Date emprunt</th>
                   <th>Date retour</th>
-                  <th>Nom lecteur</th>
-                  <th>Genre</th>
+                  <th>Nom emprunteur</th>
                 </tr>
               </thead>
               <tbody>
@@ -75,7 +74,6 @@ function Reserver() {
                     <td>{formatDate(emprunt.date_emprunt)}</td>
                     <td>{formatDate(emprunt.date_retour)}</td>
                     <td>{emprunt.Nom} {emprunt.Prenom}</td>
-                    <td>{emprunt.genre}</td>
                   </tr>
                 ))}
               </tbody>

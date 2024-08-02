@@ -324,16 +324,12 @@ body.popup-open {
     margin: 0 10px;
     padding: 10px 20px;
     border: none;
-    background-color: goldenrod;
+    
     color: white;
     cursor: pointer;
     border-radius: 5px;
     height: 40px;
     transition: background-color 0.3s ease;
-}
-
-.popup-footer button:hover {
-    background-color: darkgoldenrod;
 }
 
 .close-btn {

@@ -2,10 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import Slider from 'react-slick';
 import "slick-carousel/slick/slick.css";
+import "./bargate.css";
 import axios from 'axios';
-import './bargate.css';
-import '../facebi/navix.css';
+import Rater from 'react-rater'; // Import Rater from react-rater
+import 'react-rater/lib/react-rater.css'; // Import the default CSS for Rater
+import './navix.css';
 console.clear();
+
 function Navix() {
     const [Books, setBooks] = useState([]);
     const [Prenom, setPrenom] = useState(null);
@@ -29,7 +32,6 @@ function Navix() {
     useEffect(() => {
         const storedPrenom = localStorage.getItem('Prenom');
         setPrenom(storedPrenom);
-
         fetchBooks();
     }, []);
 
@@ -216,11 +218,16 @@ function Navix() {
                                         <span className="more-link" onClick={toggleFullSummary}>plus</span>
                                     )}
                                 </p>
+                                {/* Add the rating component here */}
+                                <strong>Comment avez vous trouvez le livre? </strong>
+                                <div className="rating">
+                                    <Rater total={5} rating={selectedBook.rating || 0} interactive={true} />
+                                </div>
                             </div>
-                        </div>
-                        <div className="popup-footer">
-                            <button className='lire'>Lire</button>
-                            <button className='reserver' onClick={() => handleReserver(selectedBook)}>Reserver</button>
+                            <div className="popup-footer">
+                                <button className='lire'>Lire</button>
+                                <button className='reserver' onClick={() => handleReserver(selectedBook)}>Réserver</button>
+                            </div>
                         </div>
                     </div>
                 </div>

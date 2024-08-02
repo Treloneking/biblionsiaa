@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 import axios from 'axios';
+import QueueList from './queueList'; // Importez le composant QueueList
 import './registerperso.css';
-console.clear();
+
 const Registerperso = () => {
   const location = useLocation();
   const { book } = location.state || {};
@@ -20,9 +21,9 @@ const Registerperso = () => {
   const handleReservationSubmit = async (event) => {
     event.preventDefault();
 
-    const currentDate = new Date();
-    const reservation = new Date(reservationDate);
-    const returnD = new Date(returnDate);
+    const currentDate = new Date().toISOString().split('T')[0]; // Format YYYY-MM-DD
+    const reservation = new Date(reservationDate).toISOString().split('T')[0];
+    const returnD = new Date(returnDate).toISOString().split('T')[0];
     const daysReserved = calculateDays(reservationDate, returnDate);
 
     // Vérifier si les dates sont passées
@@ -48,8 +49,8 @@ const Registerperso = () => {
       const response = await axios.post(
         'http://localhost:5000/app/reservation',
         {
-          date_emprunt: reservationDate,
-          date_retour: returnDate,
+          date_emprunt: reservation,
+          date_retour: returnD,
           User_Id_user: localStorage.getItem('Id_user'),
           Livre_Id_livre: book.Id_livre,
         },
@@ -61,8 +62,14 @@ const Registerperso = () => {
       );
 
       console.log('Réservation réussie : ', response.data);
-      alert(`Vous avez réservé ce livre pour ${daysReserved} jours`);
-      history.push('/app/acceuil');
+
+      // Vérifier le message d'erreur spécifique
+      if (response.data.message) {
+        alert(response.data.message);
+      } else {
+        alert(`Vous avez réservé ce livre pour ${daysReserved} jours`);
+         // Rafraîchir la page après une réservation réussie
+      }
     } catch (error) {
       console.error('Erreur lors de la réservation : ', error);
       const errorMessage = error.response && error.response.data && error.response.data.message
@@ -70,6 +77,7 @@ const Registerperso = () => {
         : 'Erreur lors de la réservation. Veuillez vérifier les informations et réessayer.';
       alert(errorMessage);
     }
+    history.push('/app/acceuil')
   };
 
   if (!book) {
@@ -103,6 +111,7 @@ const Registerperso = () => {
           />
           <button type="submit" className="reservation-button">Réserver</button>
         </form>
+        <QueueList bookId={book.Id_livre} /> {/* Ajoutez le composant QueueList avec bookId ici */}
       </div>
     </div>
   );

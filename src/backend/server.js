@@ -9,8 +9,7 @@ if (!jwtSecret) {
   console.error('La clé secrète JWT n\'est pas définie dans les variables d\'environnement.');
   process.exit(1); // Arrête le processus Node en cas d'erreur critique
 }
-const bcrypt = require('bcrypt');
-const jwt = bcrypt(jwtSecret);
+
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
 const storage = multer.memoryStorage();
@@ -19,6 +18,8 @@ const express = require('express');
 const mysql = require('mysql');
 const bodyParser = require('body-parser');
 const app = express();
+const schedule = require('node-schedule');
+const nodemailer = require('nodemailer');
 const port = 5000;
 const jwt = require('jsonwebtoken');
 const { authenticate } = require('ldap-authentication');
@@ -45,7 +46,7 @@ app.post('/login', async (req, res) => {
   const { Id_user, Mot_de_passe } = req.body;
 
   // Ajouter automatiquement @nsiaassurances.com si non présent
-  const domain = '@';
+  const domain = '@nsiaassurances.com';
   const username = Id_user.includes(domain) ? Id_user : `${Id_user}${domain}`;
 
   if (Id_user === 'Bibliothequensia' && Mot_de_passe === 'Administrateurbiblio') {
@@ -57,7 +58,7 @@ app.post('/login', async (req, res) => {
   try {
     // Configuration pour l'authentification LDAP
     const config = {
-      url: '',
+      url: 'ldap://10.10.4.4',
       baseDN: 'dc=nsia,dc=com'
     };
 
@@ -93,7 +94,7 @@ app.post('/login', async (req, res) => {
           if (results.length === 0) {
             try {
               // Création de l'utilisateur dans la base de données
-              db.query('INSERT INTO utilisateur (Nom, Prenom, Email, Mot_de_passe) VALUES (?, ?, ?, ?)', [nom, prenom, username, password], function(err, results, fields) {
+              db.query('INSERT INTO utilisateur (Nom, Prenom, Email) VALUES (?, ?, ?)', [nom, prenom, username], function(err, results, fields) {
                 if (err) {
                   console.error('Erreur lors de la création de l\'utilisateur dans la base de données :', err);
                   return res.status(500).json({ message: 'Erreur interne du serveur' });
@@ -112,7 +113,7 @@ app.post('/login', async (req, res) => {
             }
           } else {
             // Utilisateur trouvé dans la base de données, récupérer l'ID utilisateur
-            const existingUserId = results[0].id; // Assurez-vous que 'id' est bien le nom de la colonne de l'ID utilisateur dans votre table
+            const existingUserId = results[0].Id_user; // Assurez-vous que 'id' est bien le nom de la colonne de l'ID utilisateur dans votre table
             // Générer le token JWT directement
             const token = jwt.sign({ Id_user: existingUserId, username, Prenom: prenom, Nom: nom }, jwtSecret, { expiresIn: '2h' });
             return res.status(200).json({ message: 'Connexion réussie', token, Id_user: existingUserId, username, Prenom: prenom, Nom: nom });
@@ -193,47 +194,313 @@ app.post('/app/proposition', (req, res) => {
   });
 });
 
-
 app.post('/app/reservation', (req, res) => {
   const { date_emprunt, date_retour, User_Id_user, Livre_Id_livre } = req.body;
 
-  // Calculate the number of days between date_emprunt and date_retour
   const startDate = new Date(date_emprunt);
   const endDate = new Date(date_retour);
   const daysReserved = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
 
+  console.log('Dates de réservation:', date_emprunt, date_retour);
+  console.log('Durée de réservation en jours:', daysReserved);
+
+  // Vérifier si la durée de réservation dépasse 4 jours
   if (daysReserved > 4) {
-    return res.status(400).json({ message: 'Vous ne pouvez pas réserver un livre pour plus de 4 jours' });
+    return res.status(400).json({ message: 'Vous ne pouvez pas réserver un livre pour plus de 4 jours.' });
   }
 
-  // Vérifiez si une réservation existe déjà pour ce livre et ces dates
-  const checkQuery = `SELECT * FROM emprunter WHERE Livre_Id_livre = ? AND ((date_emprunt BETWEEN ? AND ?) OR (date_retour BETWEEN ? AND ?))`;
-  const checkValues = [Livre_Id_livre, date_emprunt, date_retour, date_emprunt, date_retour];
+  const checkCurrentBorrowQuery = `
+    SELECT * FROM emprunter 
+    WHERE Livre_Id_livre = ? 
+  `;
+  const checkCurrentBorrowValues = [Livre_Id_livre];
 
-  db.query(checkQuery, checkValues, (checkError, checkResults) => {
-    if (checkError) {
-      console.error('Erreur lors de la vérification des réservations existantes :', checkError);
-      return res.status(500).json({ message: 'Erreur lors de la vérification des réservations existantes' });
+  db.query(checkCurrentBorrowQuery, checkCurrentBorrowValues, (checkCurrentBorrowError, checkCurrentBorrowResults) => {
+    if (checkCurrentBorrowError) {
+      console.error('Erreur lors de la vérification des emprunts en cours :', checkCurrentBorrowError);
+      return res.status(500).json({ message: 'Erreur lors de la vérification des emprunts en cours.' });
     }
 
-    if (checkResults.length > 0) {
-      return res.status(400).json({ message: 'Ce livre est déjà réservé pour les dates spécifiées' });
+    console.log('Résultats de la vérification des emprunts en cours:', checkCurrentBorrowResults);
+
+    if (checkCurrentBorrowResults.length > 0) {
+      // Si un emprunt en cours est trouvé, vérifier les conflits de dates avec la file d'attente
+      const queueCheckQuery = `
+        SELECT * FROM queue 
+        WHERE Livre_Id_livre = ? 
+        AND (
+          (date_emprunt <= ? AND date_retour >= ?) OR
+          (date_emprunt <= ? AND date_retour >= ?) OR
+          (date_emprunt >= ? AND date_retour <= ?)
+        )
+      `;
+      const queueCheckValues = [Livre_Id_livre, date_retour, date_emprunt, date_emprunt, date_retour, date_emprunt, date_retour];
+
+      db.query(queueCheckQuery, queueCheckValues, (queueCheckError, queueCheckResults) => {
+        if (queueCheckError) {
+          console.error('Erreur lors de la vérification des dates de la file d\'attente :', queueCheckError);
+          return res.status(500).json({ message: 'Erreur lors de la vérification des dates de la file d\'attente.' });
+        }
+
+        console.log('Résultats de la vérification des dates de la file d\'attente:', queueCheckResults);
+
+        if (queueCheckResults.length > 0) {
+          return res.status(400).json({ message: 'Il y a déjà une réservation similaire dans la file d\'attente. Veuillez choisir une autre date.' });
+        }
+
+        // Vérifier les conflits de dates avec les emprunts existants
+        const borrowConflictQuery = `
+          SELECT * FROM emprunter 
+          WHERE Livre_Id_livre = ? 
+          AND (
+            (date_emprunt <= ? AND date_retour >= ?) OR
+            (date_emprunt <= ? AND date_retour >= ?) OR
+            (date_emprunt >= ? AND date_retour <= ?)
+          )
+        `;
+        const borrowConflictValues = [Livre_Id_livre, date_retour, date_emprunt, date_emprunt, date_retour, date_emprunt, date_retour];
+
+        db.query(borrowConflictQuery, borrowConflictValues, (borrowConflictError, borrowConflictResults) => {
+          if (borrowConflictError) {
+            console.error('Erreur lors de la vérification des emprunts existants :', borrowConflictError);
+            return res.status(500).json({ message: 'Erreur lors de la vérification des emprunts existants.' });
+          }
+
+          console.log('Résultats de la vérification des emprunts existants:', borrowConflictResults);
+
+          if (borrowConflictResults.length > 0) {
+            return res.status(400).json({ message: 'Impossible d\'être dans la file d\'attente car cette date est en emprunt.' });
+          }
+
+          // Ajouter à la file d'attente si aucune réservation conflictuelle
+          const queueQuery = `INSERT INTO queue (date_emprunt, date_retour, User_Id_user, Livre_Id_livre) VALUES (?, ?, ?, ?)`;
+          const queueValues = [date_emprunt, date_retour, User_Id_user, Livre_Id_livre];
+
+          db.query(queueQuery, queueValues, (queueError, queueResults) => {
+            if (queueError) {
+              console.error('Erreur lors de l\'ajout à la file d\'attente :', queueError);
+              return res.status(500).json({ message: 'Erreur lors de l\'ajout à la file d\'attente.' });
+            }
+
+            console.log('Réservation ajoutée à la file d\'attente:', queueResults);
+            return res.status(200).json({ message: 'Il y a déjà un emprunt en cours. Votre réservation a été ajoutée à la file d\'attente.', queueResults });
+          });
+        });
+      });
+    } else {
+      // Vérifier les réservations existantes pour des conflits de dates
+      const checkReservationConflictQuery = `
+        SELECT * FROM emprunter 
+        WHERE Livre_Id_livre = ? 
+        AND (
+          (date_emprunt <= ? AND date_retour >= ?) OR
+          (date_emprunt <= ? AND date_retour >= ?) OR
+          (date_emprunt >= ? AND date_retour <= ?)
+        )
+      `;
+      const checkReservationConflictValues = [Livre_Id_livre, date_retour, date_emprunt, date_emprunt, date_retour, date_emprunt, date_retour];
+
+      db.query(checkReservationConflictQuery, checkReservationConflictValues, (checkError, checkResults) => {
+        if (checkError) {
+          console.error('Erreur lors de la vérification des réservations existantes :', checkError);
+          return res.status(500).json({ message: 'Erreur lors de la vérification des réservations existantes.' });
+        }
+
+        console.log('Résultats de la vérification des réservations existantes:', checkResults);
+
+        if (checkResults.length > 0) {
+          // Vérifier les conflits de dates avec la file d'attente
+          const queueCheckQuery = `
+            SELECT * FROM queue 
+            WHERE Livre_Id_livre = ? 
+            AND (
+              (date_emprunt <= ? AND date_retour >= ?) OR
+              (date_emprunt <= ? AND date_retour >= ?) OR
+              (date_emprunt >= ? AND date_retour <= ?)
+            )
+          `;
+          const queueCheckValues = [Livre_Id_livre, date_retour, date_emprunt, date_emprunt, date_retour, date_emprunt, date_retour];
+
+          db.query(queueCheckQuery, queueCheckValues, (queueCheckError, queueCheckResults) => {
+            if (queueCheckError) {
+              console.error('Erreur lors de la vérification des dates de la file d\'attente :', queueCheckError);
+              return res.status(500).json({ message: 'Erreur lors de la vérification des dates de la file d\'attente.' });
+            }
+
+            console.log('Résultats de la vérification des dates de la file d\'attente:', queueCheckResults);
+
+            if (queueCheckResults.length > 0) {
+              return res.status(400).json({ message: 'Il y a déjà une réservation similaire dans la file d\'attente. Veuillez choisir une autre date.' });
+            }
+
+            // Ajouter à la file d'attente si une réservation conflictuelle est trouvée
+            const queueQuery = `INSERT INTO queue (date_emprunt, date_retour, User_Id_user, Livre_Id_livre) VALUES (?, ?, ?, ?)`;
+            const queueValues = [date_emprunt, date_retour, User_Id_user, Livre_Id_livre];
+
+            db.query(queueQuery, queueValues, (queueError, queueResults) => {
+              if (queueError) {
+                console.error('Erreur lors de l\'ajout à la file d\'attente :', queueError);
+                return res.status(500).json({ message: 'Erreur lors de l\'ajout à la file d\'attente.' });
+              }
+
+              console.log('Réservation ajoutée à la file d\'attente:', queueResults);
+              return res.status(200).json({ message: 'Il y a déjà une réservation similaire. Votre réservation a été ajoutée à la file d\'attente.', queueResults });
+            });
+          });
+        } else {
+          // Aucun emprunt ni réservation existante conflictuelle, ajouter à la table emprunter
+          const insertQuery = `INSERT INTO emprunter (date_emprunt, date_retour, User_Id_user, Livre_Id_livre) VALUES (?, ?, ?, ?)`;
+          const insertValues = [date_emprunt, date_retour, User_Id_user, Livre_Id_livre];
+
+          db.query(insertQuery, insertValues, (insertError, insertResults) => {
+            if (insertError) {
+              console.error('Erreur lors de l\'ajout de la réservation :', insertError);
+              return res.status(500).json({ message: 'Erreur lors de l\'ajout de la réservation.' });
+            }
+
+            console.log('Réservation ajoutée avec succès:', insertResults);
+            return res.status(200).json({ message: 'Réservation ajoutée avec succès.', insertResults });
+          });
+        }
+      });
     }
-
-    // Si aucune réservation n'existe pour ces dates, insérez la nouvelle réservation
-    const query = `INSERT INTO emprunter (date_emprunt, date_retour, User_Id_user, Livre_Id_livre) VALUES (?, ?, ?, ?)`;
-    const values = [date_emprunt, date_retour, User_Id_user, Livre_Id_livre];
-
-    db.query(query, values, (error, results) => {
-      if (error) {
-        console.error('Erreur lors de l\'insertion de la réservation :', error);
-        return res.status(500).json({ message: 'Erreur lors de la création de la réservation' });
-      }
-
-      res.status(201).json({ message: 'Réservation réussie', results });
-    });
   });
 });
+
+
+
+
+
+
+
+
+
+// teste automatisme
+const formatDate = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+// Fonction pour mettre à jour les réservations en retard
+const updateOverdueReservations = () => {
+  const currentDate = new Date();
+  const formattedCurrentDate = formatDate(currentDate);
+
+  // Vérifiez les livres en retard dans la table emprunter
+  db.query(
+    'SELECT * FROM emprunter WHERE date_retour < ?',
+    [formattedCurrentDate],
+    (error, overdueResults) => {
+      if (error) {
+        console.error('Erreur lors de la requête de livres en retard:', error);
+        return;
+      }
+
+      if (!Array.isArray(overdueResults)) {
+        console.error('Les résultats de la requête ne sont pas un tableau');
+        return;
+      }
+
+      console.log('overdueResults:', overdueResults);
+
+      for (const overdue of overdueResults) {
+        const { Livre_Id_livre, id_emprunt } = overdue;
+
+        // Trouvez la date la plus proche dans la table queue
+        db.query(
+          'SELECT * FROM queue WHERE Livre_Id_livre = ? ORDER BY date_emprunt ASC LIMIT 1',
+          [Livre_Id_livre],
+          (error, closestDateResults) => {
+            if (error) {
+              console.error('Erreur lors de la requête de la date la plus proche:', error);
+              return;
+            }
+
+            if (!Array.isArray(closestDateResults)) {
+              console.error('Les résultats de la requête ne sont pas un tableau');
+              return;
+            }
+
+            console.log('closestDateResults:', closestDateResults);
+
+            if (closestDateResults.length > 0) {
+              const closestDate = closestDateResults[0];
+              const formattedDateEmprunt = formatDate(closestDate.date_emprunt);
+              const formattedDateRetour = formatDate(closestDate.date_retour);
+
+              // Mettez à jour la table emprunter avec les informations de la table queue
+              db.query(
+                'UPDATE emprunter SET date_emprunt = ?, date_retour = ?, User_Id_user = ? WHERE id_emprunt = ?',
+                [formattedDateEmprunt, formattedDateRetour, closestDate.User_Id_user, id_emprunt],
+                (error) => {
+                  if (error) {
+                    console.error('Erreur lors de la mise à jour de la table emprunter:', error);
+                    return;
+                  }
+
+                  // Supprimez l'entrée mise à jour de la table queue
+                  db.query(
+                    'DELETE FROM queue WHERE Livre_Id_livre = ? AND date_emprunt = ?',
+                    [Livre_Id_livre, formattedDateEmprunt],
+                    (error) => {
+                      if (error) {
+                        console.error('Erreur lors de la suppression de la table queue:', error);
+                        return;
+                      }
+                    }
+                  );
+                }
+              );
+            }
+          }
+        );
+      }
+    }
+  );
+};
+
+// Planifiez la tâche pour exécuter la fonction tous les jours à 18h30
+schedule.scheduleJob('30 10 * * *', updateOverdueReservations);
+
+// Gérer les erreurs de connexion à la base de données
+db.on('error', (err) => {
+  console.error('Erreur de connexion à la base de données:', err);
+});
+// fin teste
+
+
+
+
+
+app.get('/app/queue', (req, res) => {
+  const { bookId } = req.query;
+
+  const query = `
+    SELECT q.*, u.nom AS user_nom, u.prenom AS user_prenom, l.Titre AS livre_titre
+    FROM queue q
+    JOIN utilisateur u ON q.User_Id_user = u.id_user
+    JOIN livre l ON q.Livre_Id_livre = l.Id_livre
+    ${bookId ? 'WHERE q.Livre_Id_livre = ?' : ''}
+    ORDER BY q.date_emprunt ASC
+  `;
+
+  const queryParams = bookId ? [bookId] : [];
+
+  db.query(query, queryParams, (error, results) => {
+    if (error) {
+      console.error('Erreur lors de la récupération de la file d\'attente :', error);
+      return res.status(500).json({ message: 'Erreur lors de la récupération de la file d\'attente.' });
+    }
+
+    res.status(200).json(results);
+  });
+});
+
+
+
+
 app.get('/app/demande', (req, res) => {
   const query = `
   SELECT * FROM proposition
@@ -281,6 +548,105 @@ app.get('/app/genres', (req, res) => {
 });
 
 
+
+
+
+
+// email send 
+
+const transporter = nodemailer.createTransport({
+  host: 'smtp.office365.com',
+  port: 587,
+  secure: false, // true pour le port 465, false pour le port 587
+  auth: {
+    user: process.env.EMAIL_USERNAME,
+    pass: process.env.EMAIL_PASSWORD
+  },
+  tls: {
+    rejectUnauthorized: false // Optionnel pour éviter les erreurs de certificat
+  }
+});
+
+// Fonction pour envoyer un email
+const sendEmail = (to, subject, text) => {
+  const mailOptions = {
+    from: process.env.EMAIL_USERNAME,
+    to: to,
+    subject: subject,
+    text: text
+  };
+
+  console.log(`Tentative d'envoi d'un email à ${to}`);
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.log('Erreur lors de l\'envoi de l\'email:', error);
+    } else {
+      console.log('Email envoyé: ' + info.response);
+    }
+  });
+};
+
+// Planification de la tâche avec node-schedule
+const job = schedule.scheduleJob('30 08*', function() {
+  const today = new Date().toISOString().split('T')[0];
+  console.log('Date de retour pour la recherche:', today);
+  function formatDate(dateString) {
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  const query = `
+    SELECT *
+    FROM emprunter e
+    LEFT JOIN utilisateur u ON e.User_Id_user = u.Id_user
+    LEFT JOIN livre l ON e.Livre_Id_livre = l.Id_livre
+    WHERE e.date_retour = ? OR e.date_emprunt = ?`;
+
+  // Pass the `today` value twice for both placeholders in the query
+  db.query(query, [today, today], (error, results) => {
+    if (error) {
+      console.error('Erreur lors de la récupération des données:', error);
+      return;
+    }
+
+    console.log('Résultats de la requête:', results);
+
+    if (results.length === 0) {
+      console.log('Aucun utilisateur à notifier aujourd\'hui.');
+    } else {
+      results.forEach(record => {
+        const email = record.Email;
+        const prenom = record.Prenom;
+        const titre = record.Titre;
+        const dater = formatDate(record.date_retour);
+        const daterem = formatDate(record.date_emprunt);
+
+        const subject='Rappel: Retour de livre';
+        const text=`Bonjour ${prenom},\n\nCeci est un rappel que vous devez retourner le livre intitulé "${titre}" emprunté le "${daterem}".\n\nCordialement,\nVotre Bibliothèque`;
+        const subject1='Rappel: Recupération de livre';
+        const text2=`Bonjour ${prenom},\n\nCeci est un rappel que vous devez passer recuperer le livre intitulé "${titre}" reservé pour le "${daterem}" .\n\nCordialement,\nVotre Bibliothèque`;
+
+        if (dater == today) {
+          sendEmail(email, subject, text);
+         } 
+         else if (daterem == today) {
+          sendEmail(email, subject1, text2);
+          }
+       else{
+          console.log('Informations manquantes pour l\'email');
+        }
+      });
+    }
+  });
+});
+// fin email send 
+
+
+// Add a like
+// Backend (Node.js/Express)
 
 app.listen(port, () => {
   console.log(`Bonjour chef le serveur a démarré sur le port ${port}`);

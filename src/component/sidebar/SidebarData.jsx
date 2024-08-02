@@ -3,12 +3,15 @@ import * as IoIcons from "react-icons/io";
 import { Link } from 'react-router-dom'; // Importer Link depuis react-router-dom
 
 const SidebarData = ({ isAdmin }) => {
+  console.log(isAdmin)
   const sidebarItems = [
+    
     {
         title: 'Acceuil',
         path: '/app/acceuil',
         icon: <IoIcons.IoIosHome/>,
         cName: 'nav-text'
+        
       },
       {
           title: "Envie d'un livre",

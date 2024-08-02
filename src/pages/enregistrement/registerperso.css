@@ -1,65 +1,45 @@
 .reservation-page-container {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  min-height: 100vh;
-  background-color: #f0f0f0;
   padding: 20px;
+  background-color: #f5f5f5;
 }
 
 .reservation-page-content {
+  width: 100%;
+  max-width: 800px;
   background: #fff;
   padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  text-align: center;
-  max-width: 400px;
-  width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .book-image {
-  width: 100px;
-  height: 150px;
-  object-fit: cover;
+  width: 100%;
+  max-width: 200px;
   margin-bottom: 20px;
 }
 
-.reservation-page-content h2 {
-  font-size: 24px;
-  margin-bottom: 10px;
-}
-
-.reservation-page-content p {
-  font-size: 18px;
-  margin-bottom: 20px;
-}
-
-.reservation-page-content form {
+.reservation-form {
   display: flex;
   flex-direction: column;
 }
 
-.reservation-page-content form label {
-  font-size: 16px;
+.date-input {
   margin-bottom: 10px;
-}
-
-.reservation-page-content form input {
-  padding: 10px;
-  font-size: 16px;
-  margin-bottom: 20px;
+  padding: 8px;
   border: 1px solid #ccc;
-  border-radius: 5px;
+  border-radius: 4px;
 }
 
 .reservation-button {
+  padding: 10px 15px;
   background-color: #007bff;
   color: white;
   border: none;
-  padding: 10px 20px;
-  font-size: 16px;
+  border-radius: 4px;
   cursor: pointer;
-  border-radius: 5px;
 }
 
 .reservation-button:hover {
