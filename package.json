@@ -1,9 +1,8 @@
 {
-<<<<<<< HEAD
+       
   "name": "biblio",
-=======
   "name": "gesnsiaa",
->>>>>>> 8de12ab82be0507f09cf18cdc43f454b9050a598
+    
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -22,10 +21,9 @@
     "emailjs": "^4.0.3",
     "express": "^4.19.2",
     "file-saver": "^2.0.5",
-<<<<<<< HEAD
+       
     "fs": "^0.0.1-security",
-=======
->>>>>>> 8de12ab82be0507f09cf18cdc43f454b9050a598
+
     "jsonwebtoken": "^9.0.2",
     "ldap-authentication": "^3.2.2",
     "ldapjs": "^3.0.7",

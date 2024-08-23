@@ -21,11 +21,9 @@ function Reserver() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-<<<<<<< HEAD
+       
         const response = await axios.get('http://10.11.100.2:8000/app/reserver');
-=======
-        const response = await axios.get('http://localhost:5000/app/reserver');
->>>>>>> 8de12ab82be0507f09cf18cdc43f454b9050a598
+    
         if (response.data.length === 0) {
           setError('Aucun résultat trouvé.');
         } else {

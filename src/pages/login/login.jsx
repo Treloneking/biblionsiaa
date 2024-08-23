@@ -14,12 +14,8 @@ const Login = ({ onLogin }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-<<<<<<< HEAD
+       
       const response = await axios.post('http://10.11.100.2:8000/login', { Id_user, Mot_de_passe });
-=======
-      const response = await axios.post('http://localhost:5000/login', { Id_user, Mot_de_passe });
->>>>>>> 8de12ab82be0507f09cf18cdc43f454b9050a598
-
       if (response.status === 200) {
         // Stocker le token JWT dans le localStorage
         localStorage.setItem('token', response.data.token);
