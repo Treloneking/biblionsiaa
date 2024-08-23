@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+<<<<<<< HEAD
+=======
+import { useHistory } from 'react-router-dom';
+>>>>>>> 8de12ab82be0507f09cf18cdc43f454b9050a598
 import './demande.css';
 console.clear();
 function formatDate(dateString) {
@@ -15,11 +19,19 @@ function Demande() {
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10); // Nombre d'éléments par page par défaut
+<<<<<<< HEAD
+=======
+  const history = useHistory();
+>>>>>>> 8de12ab82be0507f09cf18cdc43f454b9050a598
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+<<<<<<< HEAD
         const response = await axios.get('http://10.11.100.2:8000/app/demande');
+=======
+        const response = await axios.get('http://localhost:5000/app/demande');
+>>>>>>> 8de12ab82be0507f09cf18cdc43f454b9050a598
         if (response.data.length === 0) {
           setError('Aucun résultat trouvé.');
         } else {
@@ -48,7 +60,11 @@ function Demande() {
 
   const handleMoreInfoClick = async (propositionId) => {
     try {
+<<<<<<< HEAD
       const response = await axios.get(`http://10.11.100.2:8000/app/okay/${propositionId}`);
+=======
+      const response = await axios.get(`http://localhost:5000/app/okay/${propositionId}`);
+>>>>>>> 8de12ab82be0507f09cf18cdc43f454b9050a598
       // Utilisez la réponse pour afficher les détails supplémentaires, par exemple en ouvrant une modal ou une nouvelle page
       console.log('Détails de la proposition:', response.data);
     } catch (error) {

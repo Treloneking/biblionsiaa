@@ -40,7 +40,11 @@ function Navix() {
     }, [genre]);
 
     const fetchBooks = () => {
+<<<<<<< HEAD
         let url = 'http://10.11.100.2:8000/app';
+=======
+        let url = 'http://localhost:5000/app';
+>>>>>>> 8de12ab82be0507f09cf18cdc43f454b9050a598
         if (genre) {
             url += `?genre=${genre}`;
         }

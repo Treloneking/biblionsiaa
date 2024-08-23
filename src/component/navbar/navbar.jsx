@@ -31,7 +31,11 @@ function Navbar() {
     setPrenom(storedPrenom);
     setNom(storedNom);
 
+<<<<<<< HEAD
     axios.get('http://10.11.100.2:8000/app')
+=======
+    axios.get('http://localhost:5000/app')
+>>>>>>> 8de12ab82be0507f09cf18cdc43f454b9050a598
       .then(response => {
         setBooks(response.data);
         // Vérifier si l'utilisateur est admin (exemple basique)

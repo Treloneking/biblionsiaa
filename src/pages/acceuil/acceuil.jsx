@@ -10,7 +10,10 @@ import Proposition from '../proposition/Proposition';
 import Demande from '../demnde/demande';
 import Livre from '../Ajout livre/livre';
 import Reserver from '../reservation/reservation';
+<<<<<<< HEAD
 import SeLivre from '../sortie/sortie';
+=======
+>>>>>>> 8de12ab82be0507f09cf18cdc43f454b9050a598
 
 function Acceuil() {
   return (
@@ -24,7 +27,10 @@ function Acceuil() {
           <Route path="/app/demande" component={Demande}/>
           <Route path="/app/ajout-livre" component={Livre}/>
           <Route path="/app/reserver" component={Reserver}/>
+<<<<<<< HEAD
           <Route path="/app/selivre" component={SeLivre}/>
+=======
+>>>>>>> 8de12ab82be0507f09cf18cdc43f454b9050a598
         </Switch>
       </Router>
     </div>

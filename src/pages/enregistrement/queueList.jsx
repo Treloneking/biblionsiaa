@@ -17,7 +17,11 @@ const QueueList = ({ bookId }) => {
     const fetchQueue = async () => {
       try {
         const token = localStorage.getItem('token'); // Get the JWT token from local storage
+<<<<<<< HEAD
         const response = await axios.get('http://10.11.100.2:8000/app/queue', {
+=======
+        const response = await axios.get('http://localhost:5000/app/queue', {
+>>>>>>> 8de12ab82be0507f09cf18cdc43f454b9050a598
           headers: {
             'Authorization': `Bearer ${token}`, // Add the token to the request headers
           },

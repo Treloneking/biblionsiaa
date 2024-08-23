@@ -8,7 +8,11 @@ const db = mysql.createConnection({
   host: 'localhost', // Adresse de votre serveur MySQL
   user: 'root', // Nom d'utilisateur MySQL
   password: '', // Mot de passe MySQL
+<<<<<<< HEAD
   database: 'biblio' // Nom de la base de données
+=======
+  database: 'gesnsiaa' // Nom de la base de données
+>>>>>>> 8de12ab82be0507f09cf18cdc43f454b9050a598
 });
 
 // Connecter à la base de données

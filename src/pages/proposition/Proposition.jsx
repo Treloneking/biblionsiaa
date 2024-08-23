@@ -34,7 +34,11 @@ const Proposition = () => {
     };
 
     // Envoyer la requête au backend
+<<<<<<< HEAD
     axios.post('http://10.11.100.2:8000/app/proposition', proposalData)
+=======
+    axios.post('http://localhost:5000/app/proposition', proposalData)
+>>>>>>> 8de12ab82be0507f09cf18cdc43f454b9050a598
       .then(response => {
         alert('Livre proposé avec succès!');
         // Réinitialiser le formulaire après le succès
