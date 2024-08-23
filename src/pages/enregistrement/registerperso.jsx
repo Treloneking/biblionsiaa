@@ -39,24 +39,15 @@ const Registerperso = () => {
     }
 
     // Vérifier si la durée de réservation dépasse 4 jours
-<<<<<<< HEAD
     if (daysReserved > 7) {
       alert("Vous ne pouvez pas réserver un livre pour plus d'une semaine.");
-=======
-    if (daysReserved > 4) {
-      alert('Vous ne pouvez pas réserver un livre pour plus de 4 jours.');
->>>>>>> 8de12ab82be0507f09cf18cdc43f454b9050a598
       return;
     }
 
     try {
       const token = localStorage.getItem('token'); // Get the JWT token from local storage
       const response = await axios.post(
-<<<<<<< HEAD
         'http://10.11.100.2:8000/app/reservation',
-=======
-        'http://localhost:5000/app/reservation',
->>>>>>> 8de12ab82be0507f09cf18cdc43f454b9050a598
         {
           date_emprunt: reservation,
           date_retour: returnD,
