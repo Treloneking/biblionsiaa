@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 /* Général */
 body {
   font-family: 'Arial', sans-serif;
@@ -91,62 +90,3 @@ h1 {
     gap: 5px;
   }
 }
-=======
-.add-book-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    background-color: #f4f4f9;
-  }
-  
-  h1 {
-    color: #333;
-    margin-bottom: 20px;
-  }
-  
-  .message {
-    color: green;
-    margin-bottom: 20px;
-  }
-  
-  .add-book-form {
-    background: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 500px;
-  }
-  
-  .form-group {
-    margin-bottom: 15px;
-  }
-  
-  label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-  }
-
-  textarea {
-    resize: vertical;
-    height: 100px;
-  }
-  
-  .submit-button {
-    background-color: #4CAF50;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-  }
-  
-  .submit-button:hover {
-    background-color: #45a049;
-  }
-  
->>>>>>> 8de12ab82be0507f09cf18cdc43f454b9050a598

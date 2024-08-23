@@ -28,7 +28,6 @@ const SidebarData = ({ isAdmin }) => {
           hidden: !isAdmin
         },
         {
-<<<<<<< HEAD
           title:"Sortie Livre",
           path: "/app/selivre",
           icon: <IoIcons.IoIosExit/>,
@@ -36,8 +35,6 @@ const SidebarData = ({ isAdmin }) => {
           hidden:!isAdmin
         },
         {
-=======
->>>>>>> 8de12ab82be0507f09cf18cdc43f454b9050a598
             title: 'Livre',
             path: '/app/ajout-livre',
             icon: <IoIcons.IoIosBook/>,
