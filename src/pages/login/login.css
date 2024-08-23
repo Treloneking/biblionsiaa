@@ -1,0 +1,64 @@
+.formulaireconnect{
+    width: 500px; 
+    height: 400px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+  border-radius: 25px;
+  text-align: center;
+  margin-top: 150px;
+  padding: 15px;
+  margin-left: auto;
+  margin-right: auto;
+  color: white;
+}
+.logo1 {
+    margin-right: 20px; /* Espacement entre le logo et le formulaire */
+  }
+  
+  .logo1 img {
+    width: 250px; /* Largeur du logo */
+    height: 100px; /* Hauteur du logo */
+  }
+.loginBackground {
+    background-image: url("./../../assets/images/fond.jpg");
+         background-size: cover; 
+        background-repeat: no-repeat;
+        width: 100%; 
+        height: 100%; 
+        position:fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+.form-group {
+  flex: 0 0 calc(50% - 20px); /* Définit la largeur de chaque groupe à 50% moins les marges */
+  margin: 10px; /* Marge entre chaque groupe */
+}
+
+label {
+  display: block; /* Affiche le label en bloc */
+  margin-bottom: 5px; /* Marge sous le label */
+}
+
+.bouton{
+    margin: 10px;
+    border-radius: 10px;
+}
+.bouton:hover{
+    size: 3rem;
+    background-color: rgba(233, 172, 18, 0.568);
+    transition-duration: 30000ms;
+}
+input{
+    border-radius: 10px;
+    width: 250px;
+}
+.cocher{
+  display: flex;
+  align-items: center;
+}
+.forgot{
+    margin: 20px;
+    padding: 15px;
+    text-align: center;
+}
