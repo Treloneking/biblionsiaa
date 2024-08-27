@@ -46,6 +46,20 @@ function SeLivre() {
   const handleItemsPerPageChange = (e) => {
     setItemsPerPage(parseInt(e.target.value));
   };
+  const handlesupp = async (id) => {
+    try {
+      // Construction correcte de l'URL avec l'ID
+      const response = await axios.delete(`http://10.11.100.2:8000/app/selivre/${id}`);
+      
+      if (response.status === 200) {
+        alert('Suppression réussie');
+        // Vous pouvez ajouter du code ici pour mettre à jour l'interface utilisateur après la suppression
+      }
+    } catch (error) {
+      console.error('Erreur lors de la suppression:', error);
+      alert('Erreur lors de la suppression');
+    }
+  };
 
   return (
     <div className='search-pag'>
@@ -72,7 +86,7 @@ function SeLivre() {
                     <td>{formatDate(emprunt.date_emprunt)}</td>
                     <td>{formatDate(emprunt.date_retour)}</td>
                     <td>{emprunt.Nom} {emprunt.Prenom}</td>
-                    <td></td>
+                    <td> <button className='bouton' onClick={() => handlesupp(emprunt.Id_sortie)}>Supprimer</button></td>
                   </tr>
                 ))}
               </tbody>

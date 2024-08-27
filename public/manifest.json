@@ -4,9 +4,7 @@
     "short_name": "BIBLIO",
     "start_url": "http://10.11.100.2:9000/",
        
-    "name": "gesnsiaa",
-    "short_name": "GESNSIAA",
-    "start_url": "http://localhost:3000/",
+   
     
     "display": "standalone",
     "background_color": "#ffffff",

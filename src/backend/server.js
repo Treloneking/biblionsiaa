@@ -133,7 +133,7 @@ app.post('/login', async (req, res) => {
                 // Récupérer l'ID de l'utilisateur inséré
                 const newUserId = results.insertId;
                 // Générer le token JWT après la création de l'utilisateur
-                const token = jwt.sign({ Id_user: newUserId, username, Prenom: prenom, Nom: nom }, jwtSecret, { expiresIn: '2h' });
+                const token = jwt.sign({ Id_user: newUserId, username, Prenom: prenom, Nom: nom }, jwtSecret, { expiresIn: '5m' });
                 return res.status(200).json({ message: 'Connexion réussie', token, Id_user: newUserId, username, Prenom: prenom, Nom: nom });
               });
             } catch (error) {
@@ -144,7 +144,7 @@ app.post('/login', async (req, res) => {
             // Utilisateur trouvé dans la base de données, récupérer l'ID utilisateur
             const existingUserId = results[0].Id_user; // Assurez-vous que 'id' est bien le nom de la colonne de l'ID utilisateur dans votre table
             // Générer le token JWT directement
-            const token = jwt.sign({ Id_user: existingUserId, username, Prenom: prenom, Nom: nom }, jwtSecret, { expiresIn: '2h' });
+            const token = jwt.sign({ Id_user: existingUserId, username, Prenom: prenom, Nom: nom }, jwtSecret, { expiresIn: '5m' });
             return res.status(200).json({ message: 'Connexion réussie', token, Id_user: existingUserId, username, Prenom: prenom, Nom: nom });
           }
         });
@@ -256,6 +256,35 @@ app.post('/app/reservation', (req, res) => {
       return res.status(400).json({ message: 'Veuillez retourner le livre emprunter, avant de pouvoir en prendre un autre.' });
     }
 
+
+
+
+    const checkUserLeservationQuery = `
+    SELECT * FROM queue 
+    WHERE User_Id_user = ? 
+  `;
+  const checkUserLeservationValues = [User_Id_user];
+
+  db.query(checkUserLeservationQuery, checkUserLeservationValues, (checkUserLeservationError, checkUserLeservationResults) => {
+    if (checkUserLeservationError) {
+      console.error('Erreur lors de la vérification des réservations de l\'utilisateur :', checkUserLeservationError);
+      return res.status(500).json({ message: 'Erreur lors de la vérification des réservations de l\'utilisateur.' });
+    }
+
+    console.log('Résultats de la vérification des réservations de l\'utilisateur:', checkUserLeservationResults);
+
+    if (checkUserLeservationResults.length > 0) {
+      return res.status(400).json({ message: `Vous êtes déja dans la liste d'attente pour un autre livre veuillez finir avec celui ci et revenir .` });
+    }
+
+
+
+
+
+
+
+
+
     const checkCurrentBorrowQuery = `
       SELECT * FROM emprunter 
       WHERE Livre_Id_livre = ? 
@@ -295,6 +324,22 @@ app.post('/app/reservation', (req, res) => {
             return res.status(400).json({ message: 'Il y a déjà une réservation similaire dans la file d\'attente. Veuillez choisir une autre date.' });
           }
 
+
+         //check next date 
+         const findNextAvailableDateQuery = `
+         SELECT MIN(date_retour) AS next_available_date
+         FROM emprunter
+         WHERE Livre_Id_livre
+         AND date_retour > ?
+         `;
+        const findNextAvailableDateValues = [Livre_Id_livre,date_retour];
+        db.query(findNextAvailableDateQuery, findNextAvailableDateValues, (findNextAvailableDateError, findNextAvailableDateResults) => {
+          if (findNextAvailableDateError) {
+            console.error('Erreur lors de la recherche de la prochaine date disponible :', findNextAvailableDateError);
+            return res.status(500).json({ message: 'Erreur lors de la recherche de la prochaine date disponible.' });
+          }
+        const nextAvailableDate = findNextAvailableDateResults[0].next_available_date;
+
           // Vérifier les conflits de dates avec les emprunts existants
           const borrowConflictQuery = `
             SELECT * FROM emprunter 
@@ -316,7 +361,7 @@ app.post('/app/reservation', (req, res) => {
             console.log('Résultats de la vérification des emprunts existants:', borrowConflictResults);
 
             if (borrowConflictResults.length > 0) {
-              return res.status(400).json({ message: 'Impossible d\'être dans la file d\'attente car cette date est en emprunt.' });
+              return res.status(400).json({ message: `Date prise mais vous pouvez resever le livre pour le ${formatDate(nextAvailableDate)}.` });
             }
 
             // Ajouter à la file d'attente si aucune réservation conflictuelle
@@ -333,6 +378,7 @@ app.post('/app/reservation', (req, res) => {
               return res.status(200).json({ message: 'Il y a déjà un emprunt en cours. Votre réservation a été ajoutée à la file d\'attente.', queueResults });
             });
           });
+        })
         });
       } else {
         // Vérifier les réservations existantes pour des conflits de dates
@@ -414,6 +460,7 @@ app.post('/app/reservation', (req, res) => {
     });
   });
 });
+});
 
 
 
@@ -470,7 +517,7 @@ const formatDate = (date) => {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
+  return `${day}-${month}-${year}`;
 };
 
 // Fonction pour mettre à jour les réservations en retard
@@ -674,7 +721,7 @@ const sendEmail = (to, subject, text) => {
 };
 
 // Planification de la tâche avec node-schedule
-const job = schedule.scheduleJob('19 09 * * *', function() {
+const job = schedule.scheduleJob('06 08 * * *', function() {
   const today = new Date().toISOString().split('T')[0];
   console.log('Date de retour pour la recherche:', today);
   function formatDate(dateString) {
@@ -786,6 +833,40 @@ app.post('/app/ajout-livre', upload.single('photo'), async (req, res) => {
     }
   }
 });
+
+
+
+app.delete('/app/selivre/:id', async (req, res) => { // Ajoutez :id à l'URL
+  try {
+    const id = req.params.id; // Récupère l'ID à partir des paramètres de la route
+    // check data exist
+    const check = await db.query('SELECT count(*) as nbr FROM se_livre WHERE Id_sortie = ?',id, async (error, results, fields) => {
+    console.log(results[0].nbr)
+
+    if (results[0].nbr > 0) {
+    // Suppression de l'élément dans la base de données
+    const result = await db.query('DELETE FROM se_livre WHERE Id_sortie = ?', id);
+      res.status(200).json({ message: 'Suppression réussie' });
+    } else {
+      res.status(404).json({ message: 'Élément non trouvé' });
+      console.log(id);
+    }
+
+    console.log(check.length)
+      
+    });
+
+    
+  } catch (error) {
+    console.error('Erreur lors de la suppression:', error);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+});
+
+
+
+
+
 
 
 
