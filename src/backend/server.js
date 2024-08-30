@@ -178,7 +178,9 @@ app.get('/app', (req, res) => {
   const { genre } = req.query;
   let query = `SELECT * 
 FROM livre
-LEFT JOIN genre_livre gb ON livre.Id_livre = gb.Livre_Id_livre`;
+LEFT JOIN genre_livre gb ON livre.Id_livre = gb.Livre_Id_livre
+WHERE gb.Genre_Id_genre = '${genre}' OR livre.Id_livre > 0
+`;
 
   if (genre) {
     query += ` AND gb.Genre_Id_genre = '${genre}'`;
