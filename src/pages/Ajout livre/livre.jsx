@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './livre.css';
+import { useHistory } from 'react-router-dom';
 
 const Livre = () => {
   const [bookData, setBookData] = useState({
@@ -11,6 +12,7 @@ const Livre = () => {
     resume: '',
     photo: null,
   });
+  const history = useHistory();
   const [genres, setGenres] = useState([]);
   const [message, setMessage] = useState('');
 
@@ -67,10 +69,12 @@ const Livre = () => {
       console.log(formData);
       const response = await axios.post('http://10.11.100.2:8000/app/ajout-livre',formData);
       setMessage(response.data.message);
+      alert('livre ajouté avec succès');
     } catch (error) {
-      console.error('Erreur lorss de l\'ajout du livre:', error.response?.data || error.message);
-      setMessage('Erreur lorss de l\'ajout du livre');
+      console.error('Erreur lors de l\'ajout du livre:', error.response?.data || error.message);
+      setMessage('Erreur lors de l\'ajout du livre');
     }
+    history.push('/app/acceuil')
   };
 
   return (

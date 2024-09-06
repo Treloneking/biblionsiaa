@@ -53,6 +53,7 @@ function SeLivre() {
       
       if (response.status === 200) {
         alert('Suppression réussie');
+        window.location.reload();
         // Vous pouvez ajouter du code ici pour mettre à jour l'interface utilisateur après la suppression
       }
     } catch (error) {

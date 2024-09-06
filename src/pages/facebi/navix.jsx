@@ -136,13 +136,15 @@ function Navix() {
     return (
         <>
             <div className='intro'>
-                <a className='texte'>Découvrez un monde de connaissances à portée de clic! Notre bibliothèque en ligne 
-                <br/>vous offre un accès illimité à une vaste collection de livres, articles, et ressources académiques,
-                <br/> disponible 24 heures sur 24, 7 jours sur 7. 
+                <a className='texte'>Découvrez un monde de connaissances à portée de clic! Notre plateforme de réservation en ligne 
+                <br/>vous offre un accès illimité à une vaste collection de livres, articles, et ressources académiques.
                 </a>
             </div>
             <div className='face-biblio'> 
-                <div className='title'><h2>Livres proposés</h2></div>
+                <div className='title'><h2>Consultez le catalogue ci-dessous ou recherchez les ressources
+                    <br/>qui vous intéressent et réservez.</h2>
+                
+                </div>
 
                 <input
                     type="text"
@@ -220,14 +222,13 @@ function Navix() {
                                         <span className="more-link" onClick={toggleFullSummary}>plus</span>
                                     )}
                                 </p>
-                                {/* Add the rating component here */}
-                                <strong>Comment avez vous trouvez le livre? </strong>
+                                {/* Add the rating component here
+                                <strong>Comment avez vous trouver le livre? </strong>
                                 <div className="rating">
                                     <Rater total={5} rating={selectedBook.rating || 0} interactive={true} />
-                                </div>
+                                </div> */}
                             </div>
                             <div className="popup-footer">
-                                <button className='lire'>Lire</button>
                                 <button className='reserver' onClick={() => handleReserver(selectedBook)}>Réserver</button>
                             </div>
                         </div>

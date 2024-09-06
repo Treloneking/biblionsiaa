@@ -78,7 +78,7 @@ app.post('/login', async (req, res) => {
   const domain = '@nsiaassurances.com';
   const username = Id_user.includes(domain) ? Id_user : `${Id_user}${domain}`;
 
-  if (Id_user === 'Bibliothequensia' && Mot_de_passe === 'Administrateurbiblio') {
+  if (Id_user === 'Biblio' && Mot_de_passe === 'Biblio') {
     // Créer un token JWT pour l'administrateur
     const token = jwt.sign({ Id_user, Prenom: 'Administrateur', Nom: 'Bibliothequensia' }, process.env.JWT_SECRET, { expiresIn: '2s' });
     return res.status(200).json({ message: 'Connexion réussie en tant qu\'administrateur', token, Id_user: 'Bibliothequensia', Prenom: 'Admin', Nom: 'Bibliothequensia' });
@@ -826,8 +826,8 @@ app.post('/app/ajout-livre', upload.single('photo'), async (req, res) => {
 
     res.status(201).json({ message: 'Livre ajouté avec succès' });
   } catch (error) {
-    console.error('Erreur lorsd de l\'ajout du livre:', error.message);
-    res.status(500).json({ message: 'Erreur lorsd de l\'ajout du livre', error: error.message });
+    console.error('Erreur lors de l\'ajout du livre:', error.message);
+    res.status(500).json({ message: 'Erreur lors de l\'ajout du livre', error: error.message });
   } finally {
     // Nettoyer le fichier temporaire après l'insertion
     if (fs.existsSync(photoPath)) {
